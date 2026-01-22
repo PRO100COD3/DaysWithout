@@ -195,13 +195,15 @@ final class HabitService: HabitServiceProtocol {
     // MARK: - Private Methods
     
     /// Загружает карточки из хранилища при инициализации
-    /// daysCount не пересчитывается - используется сохранённое значение
-    /// Обновление daysCount происходит через TimerService при достижении 24 часов
+    /// daysCount пересчитывается на основе startDate и текущей даты при каждом запуске
     private func loadCardsFromStorage() {
         do {
             let loadedCards = try storageService.loadCards()
-            // Используем сохранённые карточки без пересчёта daysCount
-            cards = loadedCards
+            // Пересчитываем daysCount для всех загруженных карточек
+            cards = loadedCards.map { calculateDaysCount(for: $0) }
+            
+            // Сохраняем обновлённые карточки с актуальным daysCount
+            try? storageService.saveCards(cards)
         } catch {
             // В случае ошибки загрузки начинаем с пустого массива
             cards = []
@@ -210,17 +212,21 @@ final class HabitService: HabitServiceProtocol {
     }
     
     /// Вычисляет количество дней без привычки на основе startDate и текущей даты
-    /// Используется только при создании новой карточки (daysCount = 0)
+    /// Считает полные 24-часовые периоды, а не календарные дни
     /// - Parameter card: Карточка для обновления
     /// - Returns: Карточка с обновлённым daysCount
     private func calculateDaysCount(for card: HabitCard) -> HabitCard {
-        // При создании новой карточки daysCount всегда 0
-        // Обновление происходит через TimerService при достижении 24 часов
+        // Вычисляем прошедшее время с момента startDate
+        let elapsed = Date().timeIntervalSince(card.startDate)
+        
+        // Вычисляем количество полных 24-часовых периодов
+        let fullPeriods = Int(elapsed / TimerConstants.hoursInDay)
+        
         return HabitCard(
             id: card.id,
             title: card.title,
             startDate: card.startDate,
-            daysCount: 0, // Новая карточка всегда начинается с 0
+            daysCount: max(0, fullPeriods),
             colorID: card.colorID
         )
     }

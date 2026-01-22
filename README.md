@@ -258,7 +258,8 @@ UI/
 - ✅ Реализует `Identifiable` для использования в SwiftUI списках
 - ✅ Реализует `Hashable` для сравнения и использования в коллекциях
 - ✅ Валидация длины `title` выполняется в бизнес-логике, не в UI
-- ✅ `daysCount` вычисляется автоматически на основе `startDate` и текущей даты
+- ✅ `daysCount` пересчитывается при каждом запуске приложения на основе `startDate` и текущей даты
+- ✅ `daysCount` обновляется через `TimerService` при достижении 24 часов
 
 **Расположение:** `Models/HabitCard.swift`
 
@@ -301,6 +302,7 @@ Enum, определяющий статус пользователя и соот
 **Методы:**
 - `saveCards(_ cards: [HabitCard]) throws` — сохраняет массив карточек
 - `loadCards() throws -> [HabitCard]` — загружает сохранённые карточки
+- `clearAll() throws` — полностью очищает все данные
 
 **Реализация:** `UserDefaultsStorageService`
 - Использует `UserDefaults` для хранения
@@ -330,6 +332,7 @@ protocol HabitServiceProtocol {
     func create(card: HabitCard) throws
     func delete(id: UUID) throws
     func canCreateNewCard() -> Bool
+    func update(card: HabitCard) throws
 }
 ```
 
@@ -337,7 +340,7 @@ protocol HabitServiceProtocol {
 
 1. **`getAll() -> [HabitCard]`**
    - Возвращает все сохранённые карточки привычек
-   - Автоматически обновляет `daysCount` для каждой карточки
+   - `daysCount` пересчитывается при загрузке приложения
 
 2. **`create(card: HabitCard) throws`**
    - Создаёт новую карточку привычки
@@ -357,6 +360,12 @@ protocol HabitServiceProtocol {
    - Учитывает текущий статус пользователя и лимиты
    - Используется для валидации перед созданием
 
+5. **`update(card: HabitCard) throws`**
+   - Обновляет существующую карточку привычки
+   - Валидирует длину названия (≤ 17 символов)
+   - Выбрасывает ошибку, если карточка не найдена
+   - Сохраняет изменения в хранилище
+
 **Ошибки:**
 
 `HabitServiceError` — enum с типами ошибок:
@@ -368,13 +377,62 @@ protocol HabitServiceProtocol {
 
 **Особенности:**
 - ✅ Вся бизнес-логика изолирована от UI
-- ✅ Автоматическое вычисление `daysCount` при загрузке и создании
+- ✅ Автоматическое вычисление `daysCount` при загрузке приложения (на основе `startDate` и текущей даты)
+- ✅ При создании новой карточки `daysCount` всегда равен 0
 - ✅ Строгая валидация данных
 - ✅ Строгое соблюдение лимитов Free/Pro
 - ✅ Полная обработка ошибок
 - ✅ Dependency Injection через инициализатор
 
 **Расположение:** `Services/HabitService.swift`
+
+---
+
+## ⏱️ Таймеры
+
+### TimerService
+
+Сервис для управления 24-часовыми таймерами карточек привычек. Отслеживает время и обновляет `daysCount` при достижении 24 часов.
+
+**Публичный API:**
+
+```swift
+protocol TimerServiceProtocol {
+    func restartTimer(for cardId: UUID) throws
+    func getRemainingTime(for cardId: UUID) -> TimeInterval?
+    func checkAndUpdateTimers() throws
+    func timerUpdates(for cardId: UUID) -> AnyPublisher<TimeInterval, Never>
+}
+```
+
+**Методы:**
+
+1. **`restartTimer(for cardId: UUID) throws`**
+   - Перезапускает таймер для карточки со сбросом
+   - Сбрасывает `startDate` на текущую дату
+   - Сбрасывает `daysCount` на 0
+   - Запускает таймер, который обновляется каждую секунду
+
+2. **`getRemainingTime(for cardId: UUID) -> TimeInterval?`**
+   - Возвращает оставшееся время до завершения текущего 24-часового периода
+   - Возвращает `nil`, если карточка не найдена
+   - Автоматически проверяет и обновляет таймеры перед возвратом времени
+
+3. **`checkAndUpdateTimers() throws`**
+   - Проверяет все таймеры и обновляет `daysCount` при достижении 24 часов
+   - Вызывается автоматически при обращении к таймеру
+
+4. **`timerUpdates(for cardId: UUID) -> AnyPublisher<TimeInterval, Never>`**
+   - Подписка на обновления таймера (для UI)
+   - Отправляет оставшееся время каждую секунду
+
+**Особенности:**
+- ✅ Таймер работает каждую секунду и обновляет `daysCount` при достижении 24 часов
+- ✅ `daysCount` пересчитывается при каждом запуске приложения через `HabitService`
+- ✅ Не использует NotificationCenter или UIKit-зависимости
+- ✅ Полностью изолирован от UI
+
+**Расположение:** `Services/TimerService.swift`
 
 ---
 
@@ -509,10 +567,12 @@ DaysWithout/
 ├── Core/
 │   ├── UserStatus.swift             # Enum статусов пользователя
 │   ├── UserStatusProvider.swift     # Протокол и реализация провайдера статуса
+│   ├── TimerConstants.swift         # Константы для таймера
 │   └── ExampleUsage.swift           # Примеры использования логики
 └── Services/
     ├── StorageService.swift         # Протокол и реализация хранилища
-    └── HabitService.swift           # Основной сервис управления карточками
+    ├── HabitService.swift           # Основной сервис управления карточками
+    └── TimerService.swift           # Сервис управления таймерами
 ```
 
 ---

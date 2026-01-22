@@ -18,6 +18,9 @@ protocol StorageService: Sendable {
     /// Загружает сохранённые карточки привычек
     /// - Returns: Массив карточек или пустой массив, если данных нет
     func loadCards() throws -> [HabitCard]
+    
+    /// Полностью очищает все сохранённые данные
+    func clearAll() throws
 }
 
 /// Реализация хранилища через UserDefaults.
@@ -45,5 +48,9 @@ final class UserDefaultsStorageService: StorageService {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode([HabitCard].self, from: data)
+    }
+    
+    func clearAll() throws {
+        UserDefaults.standard.removeObject(forKey: storageKey)
     }
 }

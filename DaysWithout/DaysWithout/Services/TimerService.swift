@@ -7,7 +7,6 @@
 
 import Foundation
 import Combine
-import SwiftUI
 
 /// Ошибки сервиса таймеров
 enum TimerServiceError: LocalizedError, Sendable {
@@ -60,7 +59,6 @@ final class TimerService: TimerServiceProtocol {
     /// - Parameter habitService: Сервис для работы с карточками привычек
     init(habitService: HabitServiceProtocol) {
         self.habitService = habitService
-        setupAppLifecycleObservers()
     }
     
     // MARK: - TimerServiceProtocol
@@ -91,6 +89,9 @@ final class TimerService: TimerServiceProtocol {
     }
     
     func getRemainingTime(for cardId: UUID) -> TimeInterval? {
+        // Проверяем и обновляем таймеры перед получением времени
+        try? checkAndUpdateTimers()
+        
         let cards = habitService.getAll()
         guard let card = cards.first(where: { $0.id == cardId }) else {
             return nil
@@ -182,27 +183,11 @@ final class TimerService: TimerServiceProtocol {
         RunLoop.current.add(timer, forMode: .common)
     }
     
-    /// Настройка наблюдателей за жизненным циклом приложения
-    private func setupAppLifecycleObservers() {
-        #if canImport(UIKit)
-        NotificationCenter.default.addObserver(
-            forName: UIApplication.didBecomeActiveNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            // При активации приложения проверяем таймеры
-            // Это гарантирует, что daysCount обновится даже если приложение было закрыто
-            try? self?.checkAndUpdateTimers()
-        }
-        #endif
-    }
-    
     deinit {
         // Останавливаем все таймеры при деинициализации
         timers.values.forEach { $0.invalidate() }
         timers.removeAll()
         timerSubjects.values.forEach { $0.send(completion: .finished) }
         timerSubjects.removeAll()
-        NotificationCenter.default.removeObserver(self)
     }
 }
