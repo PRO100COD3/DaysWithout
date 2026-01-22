@@ -93,8 +93,8 @@ final class TimerService: TimerServiceProtocol {
         
         // Вычисляем прошедшее время в текущем 24-часовом периоде
         // (учитываем уже прошедшие полные периоды)
-        let elapsedInCurrentPeriod = elapsed.truncatingRemainder(dividingBy: TimerConstants.hoursInDay)
-        let remaining = TimerConstants.hoursInDay - elapsedInCurrentPeriod
+        let elapsedInCurrentPeriod = elapsed.truncatingRemainder(dividingBy: TimerConstants.secondsInDay)
+        let remaining = TimerConstants.secondsInDay - elapsedInCurrentPeriod
         
         return remaining > 0 ? remaining : 0
     }

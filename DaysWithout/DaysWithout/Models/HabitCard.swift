@@ -29,7 +29,7 @@ struct HabitCard: Codable, Identifiable, Hashable, Sendable {
     /// Не сохраняется в хранилище, всегда вычисляется динамически
     var daysCount: Int {
         let elapsed = Date().timeIntervalSince(startDate)
-        let fullPeriods = Int(elapsed / TimerConstants.hoursInDay)
+        let fullPeriods = Int(elapsed / TimerConstants.secondsInDay)
         return max(0, fullPeriods)
     }
     
