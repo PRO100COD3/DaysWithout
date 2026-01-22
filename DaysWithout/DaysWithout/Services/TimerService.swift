@@ -82,7 +82,7 @@ final class TimerService: TimerServiceProtocol {
         )
         
         // Обновляем карточку
-        try habitService.update(card: resetCard)
+        try habitService.create(card: resetCard)
         
         // Запускаем таймер заново
         startTimerInternal(for: cardId)
@@ -130,7 +130,7 @@ final class TimerService: TimerServiceProtocol {
                 )
                 
                 // Обновляем через HabitService
-                try habitService.update(card: updatedCard)
+                try habitService.create(card: updatedCard)
             }
         }
     }

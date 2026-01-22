@@ -15,8 +15,10 @@ protocol HabitServiceProtocol: Sendable {
     /// - Returns: Массив всех карточек
     func getAll() -> [HabitCard]
     
-    /// Создаёт новую карточку привычки
-    /// - Parameter card: Карточка для создания
+    /// Создаёт или обновляет карточку привычки
+    /// Если карточка с таким ID уже существует - обновляет её
+    /// Если карточки нет - создаёт новую (с проверкой лимитов)
+    /// - Parameter card: Карточка для создания или обновления
     /// - Throws: Ошибка, если превышен лимит карточек или невалидные данные
     func create(card: HabitCard) throws
     
@@ -28,11 +30,6 @@ protocol HabitServiceProtocol: Sendable {
     /// Проверяет, можно ли создать новую карточку
     /// - Returns: true, если текущее количество карточек меньше лимита
     func canCreateNewCard() -> Bool
-    
-    /// Обновляет существующую карточку привычки
-    /// - Parameter card: Обновлённая карточка
-    /// - Throws: Ошибка, если карточка не найдена
-    func update(card: HabitCard) throws
 }
 
 /// Ошибки сервиса управления карточками
@@ -109,8 +106,10 @@ final class HabitService: HabitServiceProtocol {
         return cards
     }
     
-    /// Создаёт новую карточку привычки
-    /// - Parameter card: Карточка для создания
+    /// Создаёт или обновляет карточку привычки
+    /// Если карточка с таким ID уже существует - обновляет её
+    /// Если карточки нет - создаёт новую (с проверкой лимитов)
+    /// - Parameter card: Карточка для создания или обновления
     /// - Throws: HabitServiceError при превышении лимита или невалидных данных
     func create(card: HabitCard) throws {
         // Валидация длины названия
@@ -118,27 +117,54 @@ final class HabitService: HabitServiceProtocol {
             throw HabitServiceError.titleTooLong(maxLength: maxTitleLength)
         }
         
-        // Проверка лимита карточек
-        guard canCreateNewCard() else {
-            let status = userStatusProvider.getCurrentStatus()
-            throw HabitServiceError.limitExceeded(
-                currentCount: cards.count,
-                maxLimit: status.maxCardsLimit
-            )
+        // Проверяем, существует ли карточка с таким ID
+        let isExistingCard = cards.contains(where: { $0.id == card.id })
+        
+        // Проверка лимита карточек (выполняется всегда)
+        let status = userStatusProvider.getCurrentStatus()
+        if isExistingCard {
+            // При обновлении проверяем, что текущее количество не превышает лимит
+            guard cards.count <= status.maxCardsLimit else {
+                throw HabitServiceError.limitExceeded(
+                    currentCount: cards.count,
+                    maxLimit: status.maxCardsLimit
+                )
+            }
+        } else {
+            // При создании новой карточки проверяем лимит
+            guard canCreateNewCard() else {
+                throw HabitServiceError.limitExceeded(
+                    currentCount: cards.count,
+                    maxLimit: status.maxCardsLimit
+                )
+            }
         }
         
-        // Вычисление daysCount на основе startDate и текущей даты
-        let updatedCard = calculateDaysCount(for: card)
-        
-        // Добавление карточки
-        cards.append(updatedCard)
+        if isExistingCard {
+            // Обновление существующей карточки
+            if let index = cards.firstIndex(where: { $0.id == card.id }) {
+                cards[index] = card
+            }
+        } else {
+            // Создание новой карточки
+            // Вычисление daysCount на основе startDate и текущей даты
+            let newCard = calculateDaysCount(for: card)
+            
+            // Добавление карточки
+            cards.append(newCard)
+        }
         
         // Сохранение в хранилище
         do {
             try storageService.saveCards(cards)
         } catch {
             // Откатываем изменение в случае ошибки сохранения
-            cards.removeAll { $0.id == updatedCard.id }
+            if !isExistingCard {
+                // Если это было создание новой карточки, удаляем её
+                cards.removeAll { $0.id == card.id }
+            }
+            // Если это было обновление, просто выбрасываем ошибку
+            // (восстановление старой версии требует хранения предыдущего состояния)
             throw HabitServiceError.saveError(underlying: error)
         }
     }
@@ -168,28 +194,6 @@ final class HabitService: HabitServiceProtocol {
     func canCreateNewCard() -> Bool {
         let status = userStatusProvider.getCurrentStatus()
         return cards.count < status.maxCardsLimit
-    }
-    
-    /// Обновляет существующую карточку привычки
-    /// - Parameter card: Обновлённая карточка
-    /// - Throws: HabitServiceError если карточка не найдена
-    func update(card: HabitCard) throws {
-        // Валидация длины названия
-        guard card.title.count <= maxTitleLength else {
-            throw HabitServiceError.titleTooLong(maxLength: maxTitleLength)
-        }
-        
-        guard let index = cards.firstIndex(where: { $0.id == card.id }) else {
-            throw HabitServiceError.cardNotFound(id: card.id)
-        }
-        
-        cards[index] = card
-        
-        do {
-            try storageService.saveCards(cards)
-        } catch {
-            throw HabitServiceError.saveError(underlying: error)
-        }
     }
     
     // MARK: - Private Methods
