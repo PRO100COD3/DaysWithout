@@ -15,11 +15,10 @@ protocol HabitServiceProtocol: Sendable {
     /// - Returns: Массив всех карточек
     func getAll() -> [HabitCard]
     
-    /// Создаёт или обновляет карточку привычки
-    /// Если карточка с таким ID уже существует - обновляет её
-    /// Если карточки нет - создаёт новую (с проверкой лимитов)
-    /// - Parameter card: Карточка для создания или обновления
-    /// - Throws: Ошибка, если превышен лимит карточек или невалидные данные
+    /// Создаёт новую карточку привычки
+    /// Если карточка с таким ID уже существует - создание отклоняется
+    /// - Parameter card: Карточка для создания
+    /// - Throws: Ошибка, если превышен лимит карточек, невалидные данные или карточка уже существует
     func create(card: HabitCard) throws
     
     /// Удаляет карточку привычки по идентификатору
@@ -44,6 +43,9 @@ enum HabitServiceError: LocalizedError, Sendable {
     /// Карточка с указанным ID не найдена
     case cardNotFound(id: UUID)
     
+    /// Карточка с указанным ID уже существует
+    case cardAlreadyExists(id: UUID)
+    
     /// Ошибка сохранения данных
     case saveError(underlying: Error)
     
@@ -58,6 +60,8 @@ enum HabitServiceError: LocalizedError, Sendable {
             return "Название привычки слишком длинное. Максимум символов: \(maxLength)"
         case .cardNotFound(let id):
             return "Карточка с ID \(id.uuidString) не найдена"
+        case .cardAlreadyExists(let id):
+            return "Карточка с ID \(id.uuidString) уже существует"
         case .saveError(let underlying):
             return "Ошибка сохранения данных: \(underlying.localizedDescription)"
         case .loadError(let underlying):
@@ -106,65 +110,40 @@ final class HabitService: HabitServiceProtocol {
         return cards
     }
     
-    /// Создаёт или обновляет карточку привычки
-    /// Если карточка с таким ID уже существует - обновляет её
-    /// Если карточки нет - создаёт новую (с проверкой лимитов)
-    /// - Parameter card: Карточка для создания или обновления
-    /// - Throws: HabitServiceError при превышении лимита или невалидных данных
+    /// Создаёт новую карточку привычки
+    /// - Parameter card: Карточка для создания
+    /// - Throws: HabitServiceError при превышении лимита, невалидных данных или если карточка уже существует
     func create(card: HabitCard) throws {
         // Валидация длины названия
         guard card.title.count <= maxTitleLength else {
             throw HabitServiceError.titleTooLong(maxLength: maxTitleLength)
         }
         
-        // Проверяем, существует ли карточка с таким ID
-        let isExistingCard = cards.contains(where: { $0.id == card.id })
-        
-        // Проверка лимита карточек (выполняется всегда)
-        let status = userStatusProvider.getCurrentStatus()
-        if isExistingCard {
-            // При обновлении проверяем, что текущее количество не превышает лимит
-            guard cards.count <= status.maxCardsLimit else {
-                throw HabitServiceError.limitExceeded(
-                    currentCount: cards.count,
-                    maxLimit: status.maxCardsLimit
-                )
-            }
-        } else {
-            // При создании новой карточки проверяем лимит
-            guard canCreateNewCard() else {
-                throw HabitServiceError.limitExceeded(
-                    currentCount: cards.count,
-                    maxLimit: status.maxCardsLimit
-                )
-            }
+        // Проверяем, не существует ли уже карточка с таким ID
+        guard !cards.contains(where: { $0.id == card.id }) else {
+            throw HabitServiceError.cardAlreadyExists(id: card.id)
         }
         
-        if isExistingCard {
-            // Обновление существующей карточки
-            if let index = cards.firstIndex(where: { $0.id == card.id }) {
-                cards[index] = card
-            }
-        } else {
-            // Создание новой карточки
-            // Вычисление daysCount на основе startDate и текущей даты
-            let newCard = calculateDaysCount(for: card)
-            
-            // Добавление карточки
-            cards.append(newCard)
+        // Проверка лимита карточек
+        guard canCreateNewCard() else {
+            let status = userStatusProvider.getCurrentStatus()
+            throw HabitServiceError.limitExceeded(
+                currentCount: cards.count,
+                maxLimit: status.maxCardsLimit
+            )
         }
+        
+        // Создание новой карточки
+        // daysCount вычисляется автоматически как computed property
+        // Добавление карточки
+        cards.append(card)
         
         // Сохранение в хранилище
         do {
             try storageService.saveCards(cards)
         } catch {
             // Откатываем изменение в случае ошибки сохранения
-            if !isExistingCard {
-                // Если это было создание новой карточки, удаляем её
-                cards.removeAll { $0.id == card.id }
-            }
-            // Если это было обновление, просто выбрасываем ошибку
-            // (восстановление старой версии требует хранения предыдущего состояния)
+            cards.removeAll { $0.id == card.id }
             throw HabitServiceError.saveError(underlying: error)
         }
     }
@@ -199,39 +178,16 @@ final class HabitService: HabitServiceProtocol {
     // MARK: - Private Methods
     
     /// Загружает карточки из хранилища при инициализации
-    /// daysCount пересчитывается на основе startDate и текущей даты при каждом запуске
+    /// daysCount вычисляется автоматически как computed property при каждом обращении
     private func loadCardsFromStorage() {
         do {
             let loadedCards = try storageService.loadCards()
-            // Пересчитываем daysCount для всех загруженных карточек
-            cards = loadedCards.map { calculateDaysCount(for: $0) }
-            
-            // Сохраняем обновлённые карточки с актуальным daysCount
-            try? storageService.saveCards(cards)
+            // daysCount не сохраняется и не загружается - вычисляется динамически
+            cards = loadedCards
         } catch {
             // В случае ошибки загрузки начинаем с пустого массива
             cards = []
             // Логирование ошибки можно добавить здесь
         }
-    }
-    
-    /// Вычисляет количество дней без привычки на основе startDate и текущей даты
-    /// Считает полные 24-часовые периоды, а не календарные дни
-    /// - Parameter card: Карточка для обновления
-    /// - Returns: Карточка с обновлённым daysCount
-    private func calculateDaysCount(for card: HabitCard) -> HabitCard {
-        // Вычисляем прошедшее время с момента startDate
-        let elapsed = Date().timeIntervalSince(card.startDate)
-        
-        // Вычисляем количество полных 24-часовых периодов
-        let fullPeriods = Int(elapsed / TimerConstants.hoursInDay)
-        
-        return HabitCard(
-            id: card.id,
-            title: card.title,
-            startDate: card.startDate,
-            daysCount: max(0, fullPeriods),
-            colorID: card.colorID
-        )
     }
 }

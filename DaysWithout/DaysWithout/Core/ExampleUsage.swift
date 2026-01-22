@@ -46,7 +46,6 @@ final class ExampleUsage {
             let newCard = HabitCard(
                 title: "Курение",
                 startDate: Date(),
-                daysCount: 0, // Будет пересчитано автоматически
                 colorID: 1
             )
             
@@ -120,7 +119,6 @@ final class ExampleUsage {
         let longTitleCard = HabitCard(
             title: "Это очень длинное название привычки которое превышает лимит",
             startDate: Date(),
-            daysCount: 0,
             colorID: 2
         )
         
@@ -148,7 +146,6 @@ final class ExampleUsage {
                 let card = HabitCard(
                     title: title,
                     startDate: Date(),
-                    daysCount: 0,
                     colorID: Int.random(in: 1...5)
                 )
                 

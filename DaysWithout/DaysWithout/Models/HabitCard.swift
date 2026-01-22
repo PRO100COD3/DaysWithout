@@ -22,11 +22,26 @@ struct HabitCard: Codable, Identifiable, Hashable, Sendable {
     /// Дата начала отслеживания
     let startDate: Date
     
-    /// Количество дней без привычки (вычисляется в бизнес-логике)
-    let daysCount: Int
-    
     /// Идентификатор цвета карточки
     let colorID: Int
+    
+    /// Количество дней без привычки (вычисляется на основе startDate и текущей даты)
+    /// Не сохраняется в хранилище, всегда вычисляется динамически
+    var daysCount: Int {
+        let elapsed = Date().timeIntervalSince(startDate)
+        let fullPeriods = Int(elapsed / TimerConstants.hoursInDay)
+        return max(0, fullPeriods)
+    }
+    
+    // MARK: - CodingKeys
+    
+    /// Ключи для кодирования/декодирования (исключаем daysCount из сериализации)
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case startDate
+        case colorID
+    }
     
     // MARK: - Initialization
     
@@ -35,19 +50,16 @@ struct HabitCard: Codable, Identifiable, Hashable, Sendable {
     ///   - id: Уникальный идентификатор (по умолчанию генерируется новый)
     ///   - title: Название привычки (максимум 17 символов)
     ///   - startDate: Дата начала отслеживания
-    ///   - daysCount: Количество дней без привычки
     ///   - colorID: Идентификатор цвета карточки
     init(
         id: UUID = UUID(),
         title: String,
         startDate: Date,
-        daysCount: Int,
         colorID: Int
     ) {
         self.id = id
         self.title = title
         self.startDate = startDate
-        self.daysCount = daysCount
         self.colorID = colorID
     }
 }

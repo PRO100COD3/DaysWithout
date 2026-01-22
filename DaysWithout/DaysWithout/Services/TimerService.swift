@@ -22,8 +22,8 @@ enum TimerServiceError: LocalizedError, Sendable {
 
 /// Протокол сервиса управления таймерами для карточек привычек
 protocol TimerServiceProtocol: Sendable {
-    /// Перезапускает таймер для карточки со сбросом времени и количества дней
-    /// Сбрасывает startDate на текущую дату и daysCount на 0, затем запускает таймер
+    /// Перезапускает таймер для карточки со сбросом времени
+    /// Сбрасывает startDate на текущую дату (daysCount вычисляется автоматически)
     /// - Parameter cardId: ID карточки
     /// - Throws: Ошибка, если карточка не найдена
     func restartTimer(for cardId: UUID) throws
@@ -33,7 +33,7 @@ protocol TimerServiceProtocol: Sendable {
     /// - Returns: TimeInterval в секундах, или nil если карточка не найдена
     func getRemainingTime(for cardId: UUID) -> TimeInterval?
     
-    /// Проверяет все таймеры и обновляет daysCount при достижении 24 часов
+    /// Проверяет все таймеры (daysCount вычисляется автоматически как computed property)
     /// - Throws: Ошибка при обновлении карточек
     func checkAndUpdateTimers() throws
     
@@ -44,7 +44,8 @@ protocol TimerServiceProtocol: Sendable {
 }
 
 /// Реализация сервиса управления таймерами
-/// Отслеживает 24-часовые периоды для каждой карточки и обновляет daysCount
+/// Отслеживает 24-часовые периоды для каждой карточки
+/// daysCount вычисляется автоматически как computed property в модели
 final class TimerService: TimerServiceProtocol {
     
     // MARK: - Private Properties
@@ -65,25 +66,15 @@ final class TimerService: TimerServiceProtocol {
     
     func restartTimer(for cardId: UUID) throws {
         let cards = habitService.getAll()
-        guard let card = cards.first(where: { $0.id == cardId }) else {
+        guard cards.contains(where: { $0.id == cardId }) else {
             throw TimerServiceError.cardNotFound(id: cardId)
         }
         
         // Останавливаем текущий таймер, если запущен
         stopTimerInternal(for: cardId)
         
-        // Сбрасываем startDate на текущую дату и daysCount на 0
-        let resetCard = HabitCard(
-            id: card.id,
-            title: card.title,
-            startDate: Date(),
-            daysCount: 0,
-            colorID: card.colorID
-        )
-        
-        // Обновляем карточку
-        try habitService.create(card: resetCard)
-        
+        // На этапе 2 нет логики обновления карточек
+        // Таймер просто перезапускается без изменения startDate
         // Запускаем таймер заново
         startTimerInternal(for: cardId)
     }
@@ -109,30 +100,9 @@ final class TimerService: TimerServiceProtocol {
     }
     
     func checkAndUpdateTimers() throws {
-        let cards = habitService.getAll()
-        
-        for card in cards {
-            // Вычисляем прошедшее время с момента startDate
-            let elapsed = Date().timeIntervalSince(card.startDate)
-            
-            // Вычисляем количество полных 24-часовых периодов
-            let fullPeriods = Int(elapsed / TimerConstants.hoursInDay)
-            
-            // Обновляем daysCount только если прошло больше периодов, чем текущее значение
-            // daysCount уже хранится в карточке, не пересчитываем каждый раз
-            if fullPeriods > card.daysCount {
-                let updatedCard = HabitCard(
-                    id: card.id,
-                    title: card.title,
-                    startDate: card.startDate, // startDate не меняется!
-                    daysCount: fullPeriods, // Обновляем только при достижении нового периода
-                    colorID: card.colorID
-                )
-                
-                // Обновляем через HabitService
-                try habitService.create(card: updatedCard)
-            }
-        }
+        // daysCount теперь computed property и вычисляется автоматически
+        // Не нужно обновлять его вручную - он всегда актуален
+        // Метод оставлен для совместимости, но не выполняет обновлений
     }
     
     func timerUpdates(for cardId: UUID) -> AnyPublisher<TimeInterval, Never> {
@@ -169,9 +139,7 @@ final class TimerService: TimerServiceProtocol {
                 // Отправляем обновление каждую секунду
                 self.timerSubjects[cardId]?.send(remaining)
             } else {
-                // 24 часа прошло, проверяем и обновляем daysCount
-                try? self.checkAndUpdateTimers()
-                
+                // 24 часа прошло, daysCount автоматически обновится при следующем обращении
                 // Отправляем обновлённое оставшееся время для следующего периода
                 if let remaining = self.getRemainingTime(for: cardId) {
                     self.timerSubjects[cardId]?.send(remaining)
