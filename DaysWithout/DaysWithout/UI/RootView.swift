@@ -16,7 +16,6 @@ struct RootView: View {
     @StateObject private var viewModel = RootViewModel()
     
     // MARK: - Body
-    
     var body: some View {
         // Placeholder — будет заменён на реальный UI
         EmptyView()

@@ -9,6 +9,12 @@ import SwiftUI
 
 @main
 struct DaysWithoutApp: App {
+    init() {
+        // Временный код для тестирования
+        let example = ExampleUsage()
+        example.runAllExamples()
+    }
+    
     var body: some Scene {
         WindowGroup {
             RootView()
