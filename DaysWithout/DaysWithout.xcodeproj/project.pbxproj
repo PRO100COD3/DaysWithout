@@ -10,9 +10,22 @@
 		DDCFDAC62F2158B500070A47 /* DaysWithout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DaysWithout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		DDCFDD6A2F266BA900070A47 /* Exceptions for "DaysWithout" folder in "DaysWithout" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = DDCFDAC52F2158B500070A47 /* DaysWithout */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DDCFDAC82F2158B500070A47 /* DaysWithout */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				DDCFDD6A2F266BA900070A47 /* Exceptions for "DaysWithout" folder in "DaysWithout" target */,
+			);
 			path = DaysWithout;
 			sourceTree = "<group>";
 		};

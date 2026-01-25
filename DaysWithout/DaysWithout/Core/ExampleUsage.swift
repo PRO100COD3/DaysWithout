@@ -10,7 +10,13 @@ import Foundation
 /// Пример использования бизнес-логики без UI.
 /// Демонстрирует создание, удаление карточек и проверку лимитов.
 /// 
-/// ВАЖНО: Этот файл создан только для демонстрации API.
+/// **ВАЖНО:** Этот файл используется **только для демонстрации** бизнес-логики.
+/// 
+/// Особенности:
+/// - ❌ Не привязан к App lifecycle
+/// - ❌ Не участвует в работе UI
+/// - ✅ Создан исключительно для тестирования и демонстрации API
+/// 
 /// В реальном приложении эта логика будет использоваться через ViewModel.
 final class ExampleUsage {
     
@@ -46,7 +52,6 @@ final class ExampleUsage {
             let newCard = HabitCard(
                 title: "Курение",
                 startDate: Date(),
-                daysCount: 0, // Будет пересчитано автоматически
                 colorID: 1
             )
             
@@ -120,7 +125,6 @@ final class ExampleUsage {
         let longTitleCard = HabitCard(
             title: "Это очень длинное название привычки которое превышает лимит",
             startDate: Date(),
-            daysCount: 0,
             colorID: 2
         )
         
@@ -148,7 +152,6 @@ final class ExampleUsage {
                 let card = HabitCard(
                     title: title,
                     startDate: Date(),
-                    daysCount: 0,
                     colorID: Int.random(in: 1...5)
                 )
                 
