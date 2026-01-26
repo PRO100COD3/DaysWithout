@@ -43,7 +43,7 @@ struct MainView: View {
                 
                 Spacer()
             }
-            
+            .ignoresSafeArea(edges: .bottom)
             // Кнопка "Добавить" (отображается только если не достигнут лимит статуса пользователя)
             if viewModel.shouldShowAddButton {
                 VStack {
@@ -120,7 +120,7 @@ struct MainView: View {
                 ],
                 spacing: Theme.gridRowSpacing
             ) {
-                // Отображаем карточки с учетом лимита статуса пользователя (Free: 3, Pro: 6)
+                // Отображаем карточки с учетом лимита статуса пользователя
                 ForEach(viewModel.displayableCards) { card in
                     HabitCardView(card: card)
                         .frame(height: Theme.cardHeight)
