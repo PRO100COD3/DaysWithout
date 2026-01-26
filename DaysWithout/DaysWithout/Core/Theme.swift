@@ -39,6 +39,9 @@ enum Theme {
     /// Цвет кнопки "Добавить"
     static let addButtonColor = Color(red: 94/255, green: 201/255, blue: 106/255)
     
+    /// Цвет заголовка на карточках
+    static let cardTextHeaderColor = Color(red: 242/255, green: 244/255, blue: 242/255)
+    
     /// Цвет текста на карточках
     static let cardTextColor = Color(red: 242/255, green: 244/255, blue: 242/255)
     
@@ -58,12 +61,6 @@ enum Theme {
     static let DeviderColor = Color(red: 230/255, green: 232/255, blue: 235/255)
     // MARK: - Spacing
     
-    /// Отступы между карточками
-    static let cardSpacing: CGFloat = 16
-    
-    /// Внутренние отступы карточки (по Figma)
-    static let cardPadding: CGFloat = 20
-    
     /// Отступ от краев экрана
     static let screenPadding: CGFloat = 23
     
@@ -75,16 +72,13 @@ enum Theme {
     /// Радиус скругления карточки (по Figma)
     static let cardCornerRadius: CGFloat = 24
     
-    /// Радиус кнопки "Добавить"
-    static let addButtonCornerRadius: CGFloat = 28
-    
     // MARK: - Sizes
     
     /// Размер кнопки "Добавить"
     static let addButtonSize: CGFloat = 60
     
     /// Размер прогресс-ринга на карточке
-    static let progressRingSize: CGFloat = 120
+    static let progressRingSize: CGFloat = 127
     
     // MARK: - Animation
     
@@ -93,4 +87,152 @@ enum Theme {
     
     /// Тип анимации нажатия
     static let pressAnimationType: Animation = .easeOut(duration: pressAnimationDuration)
+    
+    // MARK: - Shadow
+    
+    /// Цвет тени карточки
+    static let cardShadowColor = Color.black.opacity(0.15)
+    
+    /// Радиус размытия тени карточки
+    static let cardShadowRadius: CGFloat = 8
+    
+    /// Горизонтальное смещение тени карточки
+    static let cardShadowX: CGFloat = 0
+    
+    /// Вертикальное смещение тени карточки
+    static let cardShadowY: CGFloat = 2
+    
+    // MARK: - Button Shadow
+    
+    /// Цвет внешней тени кнопки
+    static let buttonDropShadowColor = Color.black.opacity(0.2)
+    
+    /// Радиус размытия внешней тени кнопки
+    static let buttonDropShadowRadius: CGFloat = 16
+    
+    /// Горизонтальное смещение внешней тени кнопки
+    static let buttonDropShadowX: CGFloat = 0
+    
+    /// Вертикальное смещение внешней тени кнопки
+    static let buttonDropShadowY: CGFloat = 6
+    
+    /// Spread внешней тени кнопки (эмулируется через увеличение радиуса)
+    static let buttonDropShadowSpread: CGFloat = 38
+    
+    /// Цвет внутренней тени кнопки
+    static let buttonInnerShadowColor = Color.white.opacity(0.25)
+    
+    /// Радиус размытия внутренней тени кнопки
+    static let buttonInnerShadowRadius: CGFloat = 3
+    
+    /// Горизонтальное смещение внутренней тени кнопки
+    static let buttonInnerShadowX: CGFloat = 1
+    
+    /// Вертикальное смещение внутренней тени кнопки
+    static let buttonInnerShadowY: CGFloat = 1
+    
+    // MARK: - Typography
+    
+    /// Название шрифта заголовков
+    static let headingFontName = "Onest"
+    
+    /// Название шрифта карточек
+    static let cardFontName = "Inter"
+    
+    /// Размер шрифта заголовка главного экрана
+    static let mainHeadingFontSize: CGFloat = 20
+    
+    /// Размер шрифта заголовка empty state
+    static let emptyStateHeadingFontSize: CGFloat = 18
+    
+    /// Размер шрифта описания empty state
+    static let emptyStateDescriptionFontSize: CGFloat = 14
+    
+    /// Размер шрифта названия карточки
+    static let cardTitleFontSize: CGFloat = 14
+    
+    /// Размер шрифта количества дней
+    static let cardDaysCountFontSize: CGFloat = 36
+    
+    /// Размер шрифта подписи "дней" и таймера
+    static let cardSmallTextFontSize: CGFloat = 12
+    
+    /// Размер шрифта иконки кнопки "Добавить"
+    static let addButtonIconFontSize: CGFloat = 30
+    
+    // MARK: - Main View Spacing
+    
+    /// Отступ заголовка сверху
+    static let headerTopPadding: CGFloat = 8
+    
+    /// Отступ заголовка снизу
+    static let headerBottomPadding: CGFloat = 12
+    
+    /// Отступ разделителя снизу
+    static let dividerBottomPadding: CGFloat = 20
+    
+    /// Отступ между элементами в empty state
+    static let emptyStateSpacing: CGFloat = 14
+    
+    /// Отступ empty state сверху
+    static let emptyStateTopPadding: CGFloat = 34
+    
+    /// Отступ между колонками в grid карточек
+    static let gridColumnSpacing: CGFloat = 12
+    
+    /// Отступ между строками в grid карточек
+    static let gridRowSpacing: CGFloat = 20
+    
+    /// Отступ grid сверху
+    static let gridTopPadding: CGFloat = 0
+    
+    // MARK: - Card Spacing
+    
+    /// Отступ названия карточки снизу
+    static let cardTitleBottomPadding: CGFloat = 12
+    
+    /// Отступ прогресс-ринга снизу
+    static let cardProgressRingBottomPadding: CGFloat = 14
+    
+    /// Отступ контента карточки сверху
+    static let cardContentTopPadding: CGFloat = 12
+    
+    /// Отступ контента карточки снизу
+    static let cardContentBottomPadding: CGFloat = 15
+    
+    /// Высота карточки
+    static let cardHeight: CGFloat = 216
+    
+    // MARK: - Progress Ring
+    
+    /// Толщина линии прогресс-ринга
+    static let progressRingLineWidth: CGFloat = 8
+    
+    /// Прозрачность фонового круга прогресс-ринга
+    static let progressRingBackgroundOpacity: Double = 0.4
+    
+    // MARK: - Press Animation
+    
+    /// Масштаб при нажатии на карточку
+    static let cardPressScale: CGFloat = 0.95
+    
+    /// Прозрачность при нажатии на карточку
+    static let cardPressOpacity: Double = 0.8
+    
+    /// Масштаб при нажатии на кнопку
+    static let buttonPressScale: CGFloat = 0.9
+    
+    /// Прозрачность при нажатии на кнопку
+    static let buttonPressOpacity: Double = 0.8
+    
+    /// Цвет иконки кнопки "Добавить"
+    static let addButtonIconColor = Color.white
+    
+    // MARK: - Inner Shadow Gradient
+    
+    /// Коэффициент начального радиуса внутренней тени кнопки (относительно размера кнопки)
+    static let buttonInnerShadowStartRadiusMultiplier: Double = 0.3
+    
+    /// Коэффициент конечного радиуса внутренней тени кнопки (относительно размера кнопки)
+    static let buttonInnerShadowEndRadiusMultiplier: Double = 0.6
 }

@@ -22,14 +22,41 @@ struct AddHabitButtonView: View {
             handlePress()
         }) {
             Image(systemName: "plus")
-                .font(.system(size: 30, weight: .semibold))
-                .foregroundColor(.white)
+                .font(.system(size: Theme.addButtonIconFontSize, weight: .semibold))
+                .foregroundColor(Theme.addButtonIconColor)
                 .frame(width: Theme.addButtonSize, height: Theme.addButtonSize)
                 .background(Theme.addButtonColor)
                 .clipShape(Circle())
+                .overlay(
+                    // Внутренняя тень (эмулируется через белый круг с blur)
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    Theme.buttonInnerShadowColor.opacity(0),
+                                    Theme.buttonInnerShadowColor
+                                ],
+                                center: .topLeading,
+                                startRadius: Theme.addButtonSize * Theme.buttonInnerShadowStartRadiusMultiplier,
+                                endRadius: Theme.addButtonSize * Theme.buttonInnerShadowEndRadiusMultiplier
+                            )
+                        )
+                        .blur(radius: Theme.buttonInnerShadowRadius)
+                        .offset(
+                            x: Theme.buttonInnerShadowX,
+                            y: Theme.buttonInnerShadowY
+                        )
+                        .clipShape(Circle())
+                )
         }
-        .scaleEffect(isPressed ? 0.9 : 1.0)
-        .opacity(isPressed ? 0.8 : 1.0)
+        .shadow(
+            color: Theme.buttonDropShadowColor,
+            radius: Theme.buttonDropShadowRadius + Theme.buttonDropShadowSpread,
+            x: Theme.buttonDropShadowX,
+            y: Theme.buttonDropShadowY
+        )
+        .scaleEffect(isPressed ? Theme.buttonPressScale : 1.0)
+        .opacity(isPressed ? Theme.buttonPressOpacity : 1.0)
         .animation(Theme.pressAnimationType, value: isPressed)
     }
     

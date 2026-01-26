@@ -36,28 +36,34 @@ struct HabitCardView: View {
             .cornerRadius(Theme.cardCornerRadius)
             
             // Контент карточки
-            VStack(spacing: 16) {
+            VStack(spacing: 0) {
                 // Название привычки
                 Text(card.title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Theme.cardTextColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .lineLimit(2)
-                
-                Spacer()
-                
+                    .font(.custom(Theme.cardFontName, size: Theme.cardTitleFontSize))
+                    .fontWeight(.medium)
+                    .foregroundColor(Theme.cardTextHeaderColor)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .lineLimit(1)
+                    .padding(.bottom, Theme.cardTitleBottomPadding)
+                                
                 // Прогресс-ринг с количеством дней
                 progressRingView
-                
-                Spacer()
-                
+                    .padding(.bottom, Theme.cardProgressRingBottomPadding)
+                                
                 // Таймер
                 timerView
             }
-            .padding(Theme.cardPadding)
+            .padding(.top, Theme.cardContentTopPadding)
+            .padding(.bottom, Theme.cardContentBottomPadding)
         }
-        .scaleEffect(isPressed ? 0.95 : 1.0)
-        .opacity(isPressed ? 0.8 : 1.0)
+        .shadow(
+            color: Theme.cardShadowColor,
+            radius: Theme.cardShadowRadius,
+            x: Theme.cardShadowX,
+            y: Theme.cardShadowY
+        )
+        .scaleEffect(isPressed ? Theme.cardPressScale : 1.0)
+        .opacity(isPressed ? Theme.cardPressOpacity : 1.0)
         .animation(Theme.pressAnimationType, value: isPressed)
         .onAppear {
             startTimer()
@@ -76,28 +82,36 @@ struct HabitCardView: View {
         ZStack {
             // Фоновый круг
             Circle()
-                .stroke(Color.white.opacity(0.3), lineWidth: 8)
+                .stroke(
+                    Theme.cardCircleColor.opacity(Theme.progressRingBackgroundOpacity),
+                    lineWidth: Theme.progressRingLineWidth
+                )
                 .frame(width: Theme.progressRingSize, height: Theme.progressRingSize)
             
             // Прогресс (заполненная часть)
             Circle()
                 .trim(from: 0, to: progressValue)
                 .stroke(
-                    Color.white,
-                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                    Theme.cardCircleColor,
+                    style: StrokeStyle(
+                        lineWidth: Theme.progressRingLineWidth,
+                        lineCap: .round
+                    )
                 )
                 .frame(width: Theme.progressRingSize, height: Theme.progressRingSize)
                 .rotationEffect(.degrees(-90))
             
             // Количество дней
-            VStack(spacing: 4) {
+            VStack(spacing: 0) {
                 Text("\(card.daysCount)")
-                    .font(.system(size: 48, weight: .bold))
+                    .font(.custom(Theme.cardFontName, size: Theme.cardDaysCountFontSize))
+                    .fontWeight(.bold)
                     .foregroundColor(Theme.cardTextColor)
                 
                 Text("дней")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(Theme.cardTextColor.opacity(0.9))
+                    .font(.custom(Theme.cardFontName, size: Theme.cardSmallTextFontSize))
+                    .fontWeight(.regular)
+                    .foregroundColor(Theme.cardTextHeaderColor)
             }
         }
     }
@@ -106,9 +120,10 @@ struct HabitCardView: View {
     
     private var timerView: some View {
         Text(timerString)
-            .font(.system(size: 14, weight: .regular))
-            .foregroundColor(Theme.cardTextColor.opacity(0.9))
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .font(.custom(Theme.cardFontName, size: Theme.cardSmallTextFontSize))
+            .fontWeight(.regular)
+            .foregroundColor(Theme.cardTextColor)
+            .frame(maxWidth: .infinity, alignment: .center)
     }
     
     // MARK: - Computed Properties
@@ -121,12 +136,12 @@ struct HabitCardView: View {
         return min(elapsedInCurrentPeriod / TimerConstants.secondsInDay, 1.0)
     }
     
-    /// Строковое представление таймера (формат MM:SS)
+    /// Строковое представление таймера (формат HH:MM - часы:минуты)
     private var timerString: String {
         let totalSeconds = Int(remainingTime)
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        return String(format: "%02d:%02d", hours, minutes)
     }
     
     // MARK: - Methods
@@ -184,6 +199,5 @@ struct HabitCardView: View {
             colorID: 1
         )
     )
-    .frame(width: 180, height: 240)
-    .padding()
+    .frame(width: 180, height: 0)
 }

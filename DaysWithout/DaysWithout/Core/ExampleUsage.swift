@@ -191,3 +191,33 @@ final class ExampleUsage {
         print("✅ Все примеры выполнены")
     }
 }
+
+// MARK: - Test Classes for Preview
+
+/// Тестовый провайдер для Pro статуса (используется в Preview)
+final class ProUserStatusProvider: UserStatusProvider {
+    func getCurrentStatus() -> UserStatus {
+        return .pro
+    }
+}
+
+/// Тестовый сервис хранения с предзаполненными карточками (используется в Preview)
+final class TestStorageService: StorageService {
+    private let testCards: [HabitCard]
+    
+    init(cards: [HabitCard]) {
+        self.testCards = cards
+    }
+    
+    func saveCards(_ cards: [HabitCard]) throws {
+        // Для Preview не сохраняем
+    }
+    
+    func loadCards() throws -> [HabitCard] {
+        return testCards
+    }
+    
+    func clearAll() throws {
+        // Для Preview не очищаем
+    }
+}

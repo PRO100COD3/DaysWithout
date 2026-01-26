@@ -5,6 +5,7 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>Onest.ttf</string>
+		<string>Inter.ttf</string>
 	</array>
 </dict>
 </plist>
