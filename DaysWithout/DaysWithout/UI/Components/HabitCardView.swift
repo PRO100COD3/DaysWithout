@@ -27,15 +27,21 @@ struct HabitCardView: View {
         let colors = Theme.cardColor(for: card.colorID)
         
         ZStack {
-            // Градиентный фон
+            // Градиентный фон с тенью (тень только у фона карточки)
             LinearGradient(
                 colors: [colors.top, colors.bottom],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .cornerRadius(Theme.cardCornerRadius)
+            .shadow(
+                color: Theme.cardShadowColor,
+                radius: Theme.cardShadowRadius,
+                x: Theme.cardShadowX,
+                y: Theme.cardShadowY
+            )
             
-            // Контент карточки
+            // Контент карточки (без тени)
             VStack(spacing: 0) {
                 // Название привычки
                 Text(card.title)
@@ -56,12 +62,6 @@ struct HabitCardView: View {
             .padding(.top, Theme.cardContentTopPadding)
             .padding(.bottom, Theme.cardContentBottomPadding)
         }
-        .shadow(
-            color: Theme.cardShadowColor,
-            radius: Theme.cardShadowRadius,
-            x: Theme.cardShadowX,
-            y: Theme.cardShadowY
-        )
         .scaleEffect(isPressed ? Theme.cardPressScale : 1.0)
         .opacity(isPressed ? Theme.cardPressOpacity : 1.0)
         .animation(Theme.pressAnimationType, value: isPressed)
