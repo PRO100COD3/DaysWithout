@@ -144,13 +144,8 @@ struct MainView: View {
     )
 }
 
-#Preview("2 карточки") {
+#Preview("1 карточка") {
     let testCards = [
-        HabitCard(
-            title: "Дни без сахара",
-            startDate: Date().addingTimeInterval(-5 * 24 * 3600),
-            colorID: 1
-        ),
         HabitCard(
             title: "Дни без кофе",
             startDate: Date().addingTimeInterval(-10 * 24 * 3600),

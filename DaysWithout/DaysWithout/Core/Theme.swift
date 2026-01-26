@@ -82,8 +82,9 @@ enum Theme {
     
     // MARK: - Animation
     
-    /// Длительность анимации нажатия
-    static let pressAnimationDuration: TimeInterval = 0.15
+    /// Длительность анимации нажатия (одна фаза: нажатие или возврат)
+    /// Полный цикл (нажатие + возврат) = 180мс
+    static let pressAnimationDuration: TimeInterval = 0.09
     
     /// Тип анимации нажатия
     static let pressAnimationType: Animation = .easeOut(duration: pressAnimationDuration)
