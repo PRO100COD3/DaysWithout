@@ -18,9 +18,6 @@ final class MainViewModel: ObservableObject {
     /// Список карточек привычек для отображения
     @Published private(set) var cards: [HabitCard] = []
     
-    /// Можно ли создать новую карточку (для отображения кнопки "Добавить")
-    @Published private(set) var canCreateCard: Bool = false
-    
     /// Статус пользователя (для определения лимитов)
     @Published private(set) var userStatus: UserStatus = .free
     
@@ -58,20 +55,33 @@ final class MainViewModel: ObservableObject {
     ) {
         self.habitService = habitService
         self.userStatusProvider = userStatusProvider
-        loadData()
+        
+        // Загружаем начальные данные
+        loadInitialData()
+        
+        // Подписываемся на изменения карточек
+        setupSubscriptions()
     }
     
-    // MARK: - Public Methods
+    // MARK: - Private Methods
     
-    /// Загружает данные карточек и обновляет состояние
-    func loadData() {
+    /// Загружает начальные данные карточек и статус пользователя
+    private func loadInitialData() {
         // Получаем статус пользователя
         userStatus = userStatusProvider.getCurrentStatus()
         
-        // Получаем все карточки
+        // Получаем начальный список карточек
         cards = habitService.getAll()
-        
-        // Проверяем, можно ли создать новую карточку
-        canCreateCard = habitService.canCreateNewCard()
+    }
+    
+    /// Настраивает подписки на изменения данных
+    private func setupSubscriptions() {
+        // Подписываемся на изменения карточек из HabitService
+        habitService.cardsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] updatedCards in
+                self?.cards = updatedCards
+            }
+            .store(in: &cancellables)
     }
 }

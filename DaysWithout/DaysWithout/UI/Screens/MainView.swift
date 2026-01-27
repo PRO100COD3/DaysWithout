@@ -17,10 +17,14 @@ struct MainView: View {
     
     // MARK: - Initialization
     
+    private let timerService: TimerServiceProtocol
+    
     init(
         habitService: HabitServiceProtocol,
-        userStatusProvider: UserStatusProvider
+        userStatusProvider: UserStatusProvider,
+        timerService: TimerServiceProtocol
     ) {
+        self.timerService = timerService
         _viewModel = StateObject(wrappedValue: MainViewModel(
             habitService: habitService,
             userStatusProvider: userStatusProvider
@@ -122,7 +126,7 @@ struct MainView: View {
             ) {
                 // Отображаем карточки с учетом лимита статуса пользователя
                 ForEach(viewModel.displayableCards) { card in
-                    HabitCardView(card: card)
+                    HabitCardView(card: card, timerService: timerService)
                         .frame(height: Theme.cardHeight)
                 }
             }
@@ -134,13 +138,16 @@ struct MainView: View {
 
 // MARK: - Preview
 #Preview("Нет данных") {
+    let habitService = HabitService(
+        storageService: TestStorageService(cards: []),
+        userStatusProvider: DefaultUserStatusProvider()
+    )
+    let timerService = TimerService(habitService: habitService)
     
     return MainView(
-        habitService: HabitService(
-            storageService: TestStorageService(cards: []),
-            userStatusProvider: DefaultUserStatusProvider()
-        ),
-        userStatusProvider: DefaultUserStatusProvider()
+        habitService: habitService,
+        userStatusProvider: DefaultUserStatusProvider(),
+        timerService: timerService
     )
 }
 
@@ -152,13 +159,16 @@ struct MainView: View {
             colorID: 2
         )
     ]
+    let habitService = HabitService(
+        storageService: TestStorageService(cards: testCards),
+        userStatusProvider: DefaultUserStatusProvider()
+    )
+    let timerService = TimerService(habitService: habitService)
     
     return MainView(
-        habitService: HabitService(
-            storageService: TestStorageService(cards: testCards),
-            userStatusProvider: DefaultUserStatusProvider()
-        ),
-        userStatusProvider: DefaultUserStatusProvider()
+        habitService: habitService,
+        userStatusProvider: DefaultUserStatusProvider(),
+        timerService: timerService
     )
 }
 
@@ -180,13 +190,16 @@ struct MainView: View {
             colorID: 3
         )
     ]
+    let habitService = HabitService(
+        storageService: TestStorageService(cards: testCards),
+        userStatusProvider: DefaultUserStatusProvider()
+    )
+    let timerService = TimerService(habitService: habitService)
     
     return MainView(
-        habitService: HabitService(
-            storageService: TestStorageService(cards: testCards),
-            userStatusProvider: DefaultUserStatusProvider()
-        ),
-        userStatusProvider: DefaultUserStatusProvider()
+        habitService: habitService,
+        userStatusProvider: DefaultUserStatusProvider(),
+        timerService: timerService
     )
 }
 
@@ -223,13 +236,16 @@ struct MainView: View {
             colorID: 6
         )
     ]
+    let habitService = HabitService(
+        storageService: TestStorageService(cards: testCards),
+        userStatusProvider: ProUserStatusProvider()
+    )
+    let timerService = TimerService(habitService: habitService)
     
     return MainView(
-        habitService: HabitService(
-            storageService: TestStorageService(cards: testCards),
-            userStatusProvider: ProUserStatusProvider()
-        ),
-        userStatusProvider: ProUserStatusProvider()
+        habitService: habitService,
+        userStatusProvider: ProUserStatusProvider(),
+        timerService: timerService
     )
 }
 
@@ -261,12 +277,15 @@ struct MainView: View {
             colorID: 6
         )
     ]
+    let habitService = HabitService(
+        storageService: TestStorageService(cards: testCards),
+        userStatusProvider: ProUserStatusProvider()
+    )
+    let timerService = TimerService(habitService: habitService)
     
     return MainView(
-        habitService: HabitService(
-            storageService: TestStorageService(cards: testCards),
-            userStatusProvider: ProUserStatusProvider()
-        ),
-        userStatusProvider: ProUserStatusProvider()
+        habitService: habitService,
+        userStatusProvider: ProUserStatusProvider(),
+        timerService: timerService
     )
 }

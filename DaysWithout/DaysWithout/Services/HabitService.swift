@@ -6,10 +6,15 @@
 //
 
 import Foundation
+import Combine
 
 /// Протокол сервиса управления карточками привычек.
 /// Определяет публичный API для работы с карточками.
 protocol HabitServiceProtocol: Sendable {
+    
+    /// Publisher для уведомлений об изменениях списка карточек
+    /// Отправляет новый массив карточек при любых изменениях (создание, удаление)
+    var cardsPublisher: AnyPublisher<[HabitCard], Never> { get }
     
     /// Возвращает все сохранённые карточки привычек
     /// - Returns: Массив всех карточек (может быть пустым)
@@ -115,7 +120,15 @@ final class HabitService: HabitServiceProtocol {
     private let userStatusProvider: UserStatusProvider
     
     /// Кэш загруженных карточек
-    private var cards: [HabitCard] = []
+    private var cards: [HabitCard] = [] {
+        didSet {
+            // Отправляем обновление при изменении массива карточек
+            cardsSubject.send(cards)
+        }
+    }
+    
+    /// Subject для уведомлений об изменениях карточек
+    private let cardsSubject: CurrentValueSubject<[HabitCard], Never>
     
     // MARK: - Initialization
     
@@ -129,7 +142,16 @@ final class HabitService: HabitServiceProtocol {
     ) {
         self.storageService = storageService
         self.userStatusProvider = userStatusProvider
+        // Инициализируем subject с пустым массивом, затем загружаем данные
+        self.cardsSubject = CurrentValueSubject<[HabitCard], Never>([])
         loadCardsFromStorage()
+    }
+    
+    // MARK: - HabitServiceProtocol Publisher
+    
+    /// Publisher для уведомлений об изменениях списка карточек
+    var cardsPublisher: AnyPublisher<[HabitCard], Never> {
+        cardsSubject.eraseToAnyPublisher()
     }
     
     // MARK: - HabitServiceProtocol
@@ -213,9 +235,11 @@ final class HabitService: HabitServiceProtocol {
         do {
             let loadedCards = try storageService.loadCards()
             // daysCount не сохраняется и не загружается - вычисляется динамически
+            // Присваивание вызовет didSet и отправит обновление через Publisher
             cards = loadedCards
         } catch {
             // В случае ошибки загрузки начинаем с пустого массива
+            // Присваивание вызовет didSet и отправит обновление через Publisher
             cards = []
             // Логирование ошибки можно добавить здесь
         }

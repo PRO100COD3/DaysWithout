@@ -9,17 +9,27 @@ import SwiftUI
 
 /// Компонент карточки привычки
 /// Отображает карточку с градиентом, прогресс-рингом, количеством дней и таймером
+/// Вся логика таймера и расчетов находится в HabitCardViewModel
 struct HabitCardView: View {
     
     // MARK: - Properties
     
     let card: HabitCard
+    let timerService: TimerServiceProtocol
     
+    @StateObject private var viewModel: HabitCardViewModel
     @State private var isPressed = false
-    @State private var remainingTime: TimeInterval = 0
     
-    // Таймер для обновления каждую секунду
-    @State private var timer: Timer?
+    // MARK: - Initialization
+    
+    init(card: HabitCard, timerService: TimerServiceProtocol) {
+        self.card = card
+        self.timerService = timerService
+        _viewModel = StateObject(wrappedValue: HabitCardViewModel(
+            card: card,
+            timerService: timerService
+        ))
+    }
     
     // MARK: - Body
     
@@ -64,13 +74,6 @@ struct HabitCardView: View {
         }
         .scaleEffect(isPressed ? Theme.cardPressScale : 1.0)
         .opacity(isPressed ? Theme.cardPressOpacity : 1.0)
-        .animation(Theme.pressAnimationType, value: isPressed)
-        .onAppear {
-            startTimer()
-        }
-        .onDisappear {
-            stopTimer()
-        }
         .onTapGesture {
             handlePress()
         }
@@ -90,7 +93,7 @@ struct HabitCardView: View {
             
             // Прогресс (заполненная часть)
             Circle()
-                .trim(from: 0, to: progressValue)
+                .trim(from: 0, to: viewModel.progressValue)
                 .stroke(
                     Theme.cardCircleColor,
                     style: StrokeStyle(
@@ -119,72 +122,25 @@ struct HabitCardView: View {
     // MARK: - Timer
     
     private var timerView: some View {
-        Text(timerString)
+        Text(viewModel.timerString)
             .font(.custom(Theme.cardFontName, size: Theme.cardSmallTextFontSize))
             .fontWeight(.regular)
             .foregroundColor(Theme.cardTextColor)
             .frame(maxWidth: .infinity, alignment: .center)
     }
     
-    // MARK: - Computed Properties
-    
-    /// Значение прогресса (0.0 - 1.0) для прогресс-ринга
-    private var progressValue: Double {
-        // Вычисляем прогресс в текущем 24-часовом периоде
-        let elapsed = Date().timeIntervalSince(card.startDate)
-        let elapsedInCurrentPeriod = elapsed.truncatingRemainder(dividingBy: TimerConstants.secondsInDay)
-        return min(elapsedInCurrentPeriod / TimerConstants.secondsInDay, 1.0)
-    }
-    
-    /// Строковое представление таймера (формат HH:MM - часы:минуты)
-    private var timerString: String {
-        let totalSeconds = Int(remainingTime)
-        let hours = totalSeconds / 3600
-        let minutes = (totalSeconds % 3600) / 60
-        return String(format: "%02d:%02d", hours, minutes)
-    }
-    
     // MARK: - Methods
-    
-    /// Запускает таймер обновления
-    private func startTimer() {
-        updateTimer() // Обновляем сразу
-        
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [card] _ in
-            // Вычисляем оставшееся время на основе текущей даты и startDate карточки
-            let elapsed = Date().timeIntervalSince(card.startDate)
-            let elapsedInCurrentPeriod = elapsed.truncatingRemainder(dividingBy: TimerConstants.secondsInDay)
-            let remaining = TimerConstants.secondsInDay - elapsedInCurrentPeriod
-            
-            DispatchQueue.main.async {
-                remainingTime = max(0, remaining)
-            }
-        }
-        
-        if let timer = timer {
-            RunLoop.current.add(timer, forMode: .common)
-        }
-    }
-    
-    /// Останавливает таймер
-    private func stopTimer() {
-        timer?.invalidate()
-        timer = nil
-    }
-    
-    /// Обновляет значение таймера (вызывается при появлении view)
-    private func updateTimer() {
-        let elapsed = Date().timeIntervalSince(card.startDate)
-        let elapsedInCurrentPeriod = elapsed.truncatingRemainder(dividingBy: TimerConstants.secondsInDay)
-        remainingTime = max(0, TimerConstants.secondsInDay - elapsedInCurrentPeriod)
-    }
     
     /// Обрабатывает нажатие на карточку
     private func handlePress() {
-        isPressed = true
+        withAnimation(Theme.pressAnimationType) {
+            isPressed = true
+        }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + Theme.pressAnimationDuration) {
-            isPressed = false
+            withAnimation(Theme.pressAnimationType) {
+                isPressed = false
+            }
         }
     }
 }
@@ -192,12 +148,17 @@ struct HabitCardView: View {
 // MARK: - Preview
 
 #Preview {
-    HabitCardView(
-        card: HabitCard(
-            title: "Дни без сахара",
-            startDate: Date().addingTimeInterval(-132 * 24 * 3600),
-            colorID: 1
-        )
+    let card = HabitCard(
+        title: "Дни без сахара",
+        startDate: Date().addingTimeInterval(-132 * 24 * 3600),
+        colorID: 1
     )
-    .frame(width: 180, height: 0)
+    let habitService = HabitService(
+        storageService: UserDefaultsStorageService(),
+        userStatusProvider: DefaultUserStatusProvider()
+    )
+    let timerService = TimerService(habitService: habitService)
+    
+    return HabitCardView(card: card, timerService: timerService)
+        .frame(width: 180, height: 0)
 }

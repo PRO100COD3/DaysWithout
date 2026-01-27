@@ -57,17 +57,20 @@ struct AddHabitButtonView: View {
         )
         .scaleEffect(isPressed ? Theme.buttonPressScale : 1.0)
         .opacity(isPressed ? Theme.buttonPressOpacity : 1.0)
-        .animation(Theme.pressAnimationType, value: isPressed)
     }
     
     // MARK: - Methods
     
     /// Обрабатывает нажатие на кнопку
     private func handlePress() {
-        isPressed = true
+        withAnimation(Theme.pressAnimationType) {
+            isPressed = true
+        }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + Theme.pressAnimationDuration) {
-            isPressed = false
+            withAnimation(Theme.pressAnimationType) {
+                isPressed = false
+            }
         }
         
         // На этапе 3 создание карточек не реализовано

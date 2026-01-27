@@ -47,7 +47,8 @@ DaysWithout/
 │   └── HabitCard.swift
 │
 ├── ViewModels/             # ViewModel'ы
-│   └── MainViewModel.swift
+│   ├── MainViewModel.swift
+│   └── HabitCardViewModel.swift
 │
 ├── Services/               # Бизнес-логика
 │   ├── StorageService.swift
@@ -653,8 +654,16 @@ DaysWithout/
 - Вычисление `maxCardsLimit` на основе статуса пользователя
 - Фильтрация карточек через `displayableCards` (с учетом лимита)
 - Определение видимости кнопки через `shouldShowAddButton`
+- **Реактивность:** Подписывается на `HabitService.cardsPublisher` для автоматического обновления при изменениях карточек
 - **Важно:** UI не содержит бизнес-логики, вся логика в ViewModel
 - **Важно:** Лимиты не захардкожены, получаются из `UserStatus.maxCardsLimit`
+
+**HabitCardViewModel** (`ViewModels/HabitCardViewModel.swift`)
+- Содержит логику таймера и расчетов времени
+- Подписывается на обновления через `TimerService.getRemainingTime(for:)`
+- Вычисляет `progressValue` для прогресс-ринга
+- Предоставляет `remainingTime` и `progressValue` как `@Published` свойства
+- **Важно:** Вся бизнес-логика таймера изолирована от UI
 
 #### Компоненты
 
@@ -662,18 +671,19 @@ DaysWithout/
 - Градиентный фон (цвета по `colorID` из модели через `Theme.cardColor(for:)`)
 - Радиус скругления из Theme (`cardCornerRadius`)
 - Внутренние отступы из Theme
-- Прогресс-ринг с количеством дней (вычисляется динамически)
+- Прогресс-ринг с количеством дней
 - Таймер оставшегося времени до 24 часов (формат HH:MM)
 - Тень карточки (параметры из Theme)
-- Микро-анимация нажатия (scale + opacity, 150мс, easeOut)
+- Микро-анимация нажатия (scale + opacity, 180мс, easeOut)
 - Использует `.onTapGesture` (не стандартная кнопка SwiftUI)
+- **Важно:** Вся логика таймера и расчетов находится в `HabitCardViewModel`, UI не содержит бизнес-логики
 
 **AddHabitButtonView** (`UI/Components/AddHabitButtonView.swift`)
 - Круглая кнопка с иконкой "+"
 - Условное отображение через `viewModel.shouldShowAddButton`
 - Позиционирование: правый нижний угол, игнорирует safe area снизу
 - Внешняя и внутренняя тени (параметры из Theme)
-- Микро-анимация нажатия (scale + opacity, 150мс)
+- Микро-анимация нажатия (scale + opacity, 180мс, через `withAnimation`)
 - Полностью скрывается при достижении лимита (не используется disabled-состояние)
 
 #### Тема и цвета
@@ -692,10 +702,11 @@ DaysWithout/
 #### Анимации
 
 - **Только микро-анимации нажатия:**
-  - Scale: 1.0 → 0.95
+  - Scale: 1.0 → 0.95 (карточки), 1.0 → 0.9 (кнопка)
   - Opacity: 1.0 → 0.8
-  - Длительность: 150мс
+  - Длительность: 180мс (полный цикл: нажатие + возврат, каждая фаза 90мс)
   - Тип: `easeOut`
+  - Используется `withAnimation`, а не `.animation()` модификатор (соответствует ТЗ)
 - **Запрещено:**
   - Автоматические анимации появления
   - Drag-анимации
