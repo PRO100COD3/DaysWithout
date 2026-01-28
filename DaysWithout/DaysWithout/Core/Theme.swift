@@ -30,6 +30,10 @@ enum Theme {
             return (Color(red: 250/255, green: 194/255, blue: 106/255), Color(red: 246/255, green: 140/255, blue: 62/255))
         case 6: // Красный/Коралловый
             return (Color(red: 255/255, green: 156/255, blue: 156/255), Color(red: 231/255, green: 84/255, blue: 84/255))
+        case 7: // Бирюзовый
+            return (Color(red: 127/255, green: 238/255, blue: 210/255), Color(red: 53/255, green: 192/255, blue: 164/255))
+        case 8: // Хаки
+            return (Color(red: 188/255, green: 224/255, blue: 148/255), Color(red: 127/255, green: 170/255, blue: 90/255))
         default:
             // По умолчанию зеленый
             return (Color(red: 152/255, green: 232/255, blue: 89/255), Color(red: 107/255, green: 201/255, blue: 33/255))

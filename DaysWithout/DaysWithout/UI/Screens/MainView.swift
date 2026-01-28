@@ -14,10 +14,13 @@ struct MainView: View {
     // MARK: - Properties
     
     @StateObject private var viewModel: MainViewModel
+    @State private var showAddHabitView = false
     
     // MARK: - Initialization
     
     private let timerService: TimerServiceProtocol
+    private let habitService: HabitServiceProtocol
+    private let userStatusProvider: UserStatusProvider
     
     init(
         habitService: HabitServiceProtocol,
@@ -25,6 +28,8 @@ struct MainView: View {
         timerService: TimerServiceProtocol
     ) {
         self.timerService = timerService
+        self.habitService = habitService
+        self.userStatusProvider = userStatusProvider
         _viewModel = StateObject(wrappedValue: MainViewModel(
             habitService: habitService,
             userStatusProvider: userStatusProvider
@@ -54,12 +59,51 @@ struct MainView: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        AddHabitButtonView()
-                            .padding(.trailing, Theme.buttonPadding)
-                            .padding(.bottom, Theme.buttonPadding)
+                        AddHabitButtonView(onTap: {
+                            showAddHabitView = true
+                        })
+                        .padding(.trailing, Theme.buttonPadding)
+                        .padding(.bottom, Theme.buttonPadding)
                     }
                 }
                 .ignoresSafeArea(edges: .bottom)
+            }
+        }
+        .overlay {
+            if showAddHabitView {
+                // Прозрачный фон с blur эффектом
+                ZStack {
+                    // Размытый полупрозрачный фон
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .background(.ultraThinMaterial)
+                        .onTapGesture {
+                            withAnimation {
+                                showAddHabitView = false
+                            }
+                        }
+                    
+                    // Модальное окно по центру
+                    VStack {
+                        Spacer()
+                        
+                        AddHabitView(
+                            habitService: habitService,
+                            userStatusProvider: userStatusProvider,
+                            onDismiss: {
+                                withAnimation {
+                                    showAddHabitView = false
+                                }
+                            }
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 20)
+                        
+                        Spacer()
+                    }
+                }
+                .transition(.opacity)
+                .zIndex(1000)
             }
         }
     }

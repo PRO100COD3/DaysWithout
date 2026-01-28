@@ -14,6 +14,7 @@ struct AddHabitButtonView: View {
     // MARK: - Properties
     
     @State private var isPressed = false
+    var onTap: () -> Void
     
     // MARK: - Body
     
@@ -73,8 +74,8 @@ struct AddHabitButtonView: View {
             }
         }
         
-        // На этапе 3 создание карточек не реализовано
-        // Кнопка только визуально реагирует на нажатие
+        // Вызываем callback для открытия экрана добавления
+        onTap()
     }
 }
 
@@ -85,6 +86,6 @@ struct AddHabitButtonView: View {
 //        Color.gray.opacity(0.1)
 //            .ignoresSafeArea()
         
-        AddHabitButtonView()
+        AddHabitButtonView(onTap: {})
     }
 }
