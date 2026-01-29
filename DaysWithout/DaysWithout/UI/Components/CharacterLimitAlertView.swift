@@ -22,21 +22,22 @@ struct CharacterLimitAlertView: View {
         if isPresented {
             HStack {
                 Text(message)
-                    .font(.custom(Theme.headingFontName, size: 16))
+                    .font(.custom(Theme.headingFontName, size: Theme.characterLimitAlertFontSize))
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .lineLimit(1)
+                    .frame(maxWidth: .infinity)
             }
-            .padding(24)
-            .frame(height: 58)
+            .padding(.horizontal, Theme.characterLimitAlertHorizontalPadding)
+            .frame(height: Theme.characterLimitAlertHeight)
             .background {
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: Theme.characterLimitAlertCornerRadius)
                     .fill(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.612, blue: 0.612),
-                                Color(red: 0.906, green: 0.329, blue: 0.329)
+                                Theme.characterLimitAlertGradientTop,
+                                Theme.characterLimitAlertGradientBottom
                             ]),
                             startPoint: .top,
                             endPoint: .bottom

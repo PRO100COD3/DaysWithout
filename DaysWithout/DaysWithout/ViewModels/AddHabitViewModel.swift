@@ -8,8 +8,21 @@
 import Foundation
 import Combine
 
+/// Причина ошибки валидации (без UI-строк; View маппит в Theme)
+enum AddHabitValidationReason: Sendable {
+    case emptyTitle
+    case titleTooLong(maxLength: Int)
+}
+
+/// Результат попытки создания карточки
+enum AddHabitCreateOutcome: Sendable {
+    case success
+    case validationFailed(AddHabitValidationReason)
+    case serviceError(HabitServiceError)
+}
+
 /// ViewModel для экрана добавления привычки
-/// Содержит логику валидации и создания карточки
+/// Содержит логику валидации и создания карточки; не содержит UI-строк
 @MainActor
 final class AddHabitViewModel: ObservableObject {
 
@@ -21,9 +34,6 @@ final class AddHabitViewModel: ObservableObject {
     /// Выбранный цвет карточки (colorID)
     @Published var selectedColorID: Int = 1
     
-    /// Сообщение об ошибке валидации (если есть)
-    @Published private(set) var validationError: String?
-    
     /// Можно ли создать карточку (на основе валидации)
     @Published private(set) var canCreate: Bool = false
     
@@ -32,6 +42,9 @@ final class AddHabitViewModel: ObservableObject {
     
     /// Максимальное количество карточек (для отображения лимита)
     @Published private(set) var maxCardsLimit: Int = 3
+    
+    /// Максимальная длина названия (из Theme; в HabitService — своя константа)
+    var maxTitleLength: Int { Theme.addHabitMaxTitleLength }
     
     // MARK: - Private Properties
     
@@ -67,15 +80,29 @@ final class AddHabitViewModel: ObservableObject {
     
     // MARK: - Public Methods
     
-    /// Создаёт новую карточку привычки
-    /// - Returns: Результат создания (успех или ошибка)
-    func createCard() -> Result<Void, HabitServiceError> {
-        // Валидация перед созданием
-        guard validateTitle() else {
-            return .failure(.titleTooLong(maxLength: 17))
+    /// Пытается создать карточку: валидация в ViewModel, результат без UI-строк.
+    /// View отображает сообщения через Theme по ValidationReason.
+    /// - Returns: Успех, причина валидации или ошибка сервиса
+    func attemptCreate() -> AddHabitCreateOutcome {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            return .validationFailed(.emptyTitle)
+        }
+        if trimmed.count > Theme.addHabitMaxTitleLength {
+            return .validationFailed(.titleTooLong(maxLength: Theme.addHabitMaxTitleLength))
         }
         
-        // Проверка лимита
+        switch createCard() {
+        case .success:
+            return .success
+        case .failure(let error):
+            return .serviceError(error)
+        }
+    }
+    
+    /// Создаёт новую карточку привычки (внутренний метод; вызывается после валидации)
+    /// - Returns: Результат создания (успех или ошибка)
+    private func createCard() -> Result<Void, HabitServiceError> {
         guard habitService.canCreateNewCard() else {
             let status = userStatusProvider.getCurrentStatus()
             return .failure(.limitExceeded(
@@ -84,9 +111,9 @@ final class AddHabitViewModel: ObservableObject {
             ))
         }
         
-        // Создание карточки
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let newCard = HabitCard(
-            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+            title: trimmed,
             startDate: Date(),
             colorID: selectedColorID
         )
@@ -115,19 +142,14 @@ final class AddHabitViewModel: ObservableObject {
     private func validateTitle() -> Bool {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Проверка на пустоту
         guard !trimmedTitle.isEmpty else {
-            validationError = nil
             return false
         }
         
-        // Проверка длины
-        guard trimmedTitle.count <= 17 else {
-            validationError = "Название слишком длинное (максимум 17 символов)"
+        guard trimmedTitle.count <= Theme.addHabitMaxTitleLength else {
             return false
         }
         
-        validationError = nil
         return true
     }
 }

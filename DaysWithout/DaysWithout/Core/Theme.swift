@@ -240,4 +240,140 @@ enum Theme {
     
     /// Коэффициент конечного радиуса внутренней тени кнопки (относительно размера кнопки)
     static let buttonInnerShadowEndRadiusMultiplier: Double = 0.6
+    
+    // MARK: - AddHabit Modal
+    
+    /// Горизонтальный отступ модального окна AddHabit от краёв экрана (MainView)
+    static let addHabitModalHorizontalMargin: CGFloat = 56
+    /// Радиус размытия фона главного экрана при открытии модалки AddHabit (0 = без размытия)
+    static let addHabitBackdropBlurRadius: CGFloat = 8
+    /// Горизонтальный отступ контента модального окна AddHabit
+    static let addHabitContentHorizontalPadding: CGFloat = 24
+    /// Вертикальный отступ контента модального окна AddHabit (top/bottom)
+    static let addHabitContentVerticalPadding: CGFloat = 24
+    /// Отступ заголовка от поля ввода
+    static let addHabitTitleToInputSpacing: CGFloat = 12
+    /// Внутренний отступ блока поля ввода (между элементами)
+    static let addHabitInputInternalSpacing: CGFloat = 8
+    /// Отступ поля ввода от блока выбора цвета
+    static let addHabitInputToColorSpacing: CGFloat = 16
+    /// Горизонтальный отступ блока выбора цвета
+    static let addHabitColorSectionHorizontalPadding: CGFloat = 27
+    /// Отступ блока цветов от кнопок
+    static let addHabitColorToButtonsSpacing: CGFloat = 24
+    /// Отступ между элементами в заголовке AddHabit
+    static let addHabitHeaderSpacing: CGFloat = 12
+    /// Радиус скругления модального окна AddHabit
+    static let addHabitModalCornerRadius: CGFloat = 25
+    /// Прозрачность фона модального окна AddHabit
+    static let addHabitModalBackgroundOpacity: Double = 0.85
+    /// Цвет рамки модального окна AddHabit
+    static let addHabitModalBorderColor = Color.black.opacity(0.2)
+    /// Тень модального окна AddHabit: цвет
+    static let addHabitModalShadowColor = Color.black.opacity(0.12)
+    /// Тень модального окна AddHabit: радиус
+    static let addHabitModalShadowRadius: CGFloat = 25
+    /// Тень модального окна AddHabit: смещение Y
+    static let addHabitModalShadowY: CGFloat = 10
+    /// Внутренняя тень модального окна: цвет
+    static let addHabitModalInnerShadowColor = Color.white.opacity(0.05)
+    /// Внутренняя тень модального окна: смещение Y
+    static let addHabitModalInnerShadowOffsetY: CGFloat = 4
+    /// Внутренняя тень модального окна: размытие
+    static let addHabitModalInnerShadowBlur: CGFloat = 20
+    /// Отступ алерта по горизонтали
+    static let addHabitAlertHorizontalPadding: CGFloat = 24
+    
+    /// Цвет заголовка AddHabit
+    static let addHabitHeadingColor = Color(red: 34/255, green: 34/255, blue: 34/255)
+    /// Цвет счётчика карточек AddHabit
+    static let addHabitCounterColor = Color(red: 43/255, green: 43/255, blue: 43/255).opacity(0.6)
+    /// Размер шрифта заголовка и счётчика AddHabit
+    static let addHabitHeaderFontSize: CGFloat = 16
+    
+    /// Placeholder поля названия
+    static let addHabitTitlePlaceholder = "Название"
+    /// Цвет текста поля ввода (placeholder/ввод)
+    static let addHabitInputTextColor = Color(red: 156/255, green: 163/255, blue: 175/255)
+    /// Размер шрифта поля ввода
+    static let addHabitInputFontSize: CGFloat = 14
+    /// Внутренние отступы поля ввода (horizontal, vertical)
+    static let addHabitInputPaddingH: CGFloat = 16
+    static let addHabitInputPaddingV: CGFloat = 12
+    /// Цвет фона поля ввода
+    static let addHabitInputBackgroundColor = Color(red: 247/255, green: 247/255, blue: 247/255)
+    /// Радиус скругления поля ввода
+    static let addHabitInputCornerRadius: CGFloat = 10
+    /// Цвет рамки поля ввода (норма)
+    static let addHabitInputBorderColorNormal = Color(red: 230/255, green: 230/255, blue: 230/255)
+    /// Цвет рамки поля ввода (ошибка)
+    static let addHabitInputBorderColorError = Color(red: 231/255, green: 84/255, blue: 84/255)
+    /// Тень поля ввода: цвет, радиус, Y
+    static let addHabitInputShadowColor = Color.black.opacity(0.12)
+    static let addHabitInputShadowRadius: CGFloat = 12
+    static let addHabitInputShadowY: CGFloat = 4
+    
+    /// Отступ между элементами в блоке выбора цвета
+    static let addHabitColorSectionSpacing: CGFloat = 16
+    /// Размер кружка цвета
+    static let addHabitColorCircleSize: CGFloat = 32
+    /// Размер обводки выбранного цвета (внешний frame)
+    static let addHabitColorCircleSelectedSize: CGFloat = 38
+    /// Радиус скругления обводки выбранного цвета
+    static let addHabitColorCircleSelectedCornerRadius: CGFloat = 19
+    /// Цвета обводки выбранного цвета (градиент)
+    static let addHabitColorCircleSelectedStrokeColors = [Color(red: 255/255, green: 255/255, blue: 255/255), Color(red: 240/255, green: 240/255, blue: 240/255)]
+    
+    /// Отступ между кнопками ОТМЕНА/СОЗДАТЬ
+    static let addHabitButtonsSpacing: CGFloat = 12
+    /// Высота кнопок ОТМЕНА/СОЗДАТЬ
+    static let addHabitButtonHeight: CGFloat = 44
+    /// Радиус скругления кнопок
+    static let addHabitButtonCornerRadius: CGFloat = 12
+    /// Шрифт кнопок
+    static let addHabitButtonFontSize: CGFloat = 14
+    /// Цвет текста кнопки ОТМЕНА
+    static let addHabitCancelButtonTextColor = Color(red: 110/255, green: 110/255, blue: 110/255)
+    /// Цвет фона кнопки ОТМЕНА
+    static let addHabitCancelButtonBackgroundColor = Color(red: 242/255, green: 242/255, blue: 242/255)
+    /// Цвет рамки кнопки ОТМЕНА
+    static let addHabitCancelButtonBorderColor = Color(red: 224/255, green: 224/255, blue: 224/255)
+    /// Цвет текста кнопки СОЗДАТЬ
+    static let addHabitCreateButtonTextColor = Color(red: 58/255, green: 111/255, blue: 68/255)
+    /// Цвет фона кнопки СОЗДАТЬ
+    static let addHabitCreateButtonBackgroundColor = Color(red: 216/255, green: 241/255, blue: 207/255)
+    /// Цвет рамки кнопки СОЗДАТЬ
+    static let addHabitCreateButtonBorderColor = Color(red: 212/255, green: 232/255, blue: 217/255).opacity(0.9)
+    /// Тень кнопок: цвет, радиус, Y
+    static let addHabitButtonShadowRadius: CGFloat = 12
+    static let addHabitButtonShadowY: CGFloat = 4
+    
+    /// Максимальная длина названия привычки (символов); для валидации и алертов (в HabitService — своя константа)
+    static let addHabitMaxTitleLength: Int = 17
+    
+    /// Тексты алертов AddHabit (для отображения в UI)
+    static let addHabitAlertEnterTitle = "Введите название"
+    static func addHabitAlertMaxCharacters(_ maxLength: Int) -> String {
+        "Максимальное кол-во символов - \(maxLength)"
+    }
+    
+    /// Длительность показа алерта (сек)
+    static let addHabitAlertDisplayDuration: TimeInterval = 3
+    /// Анимация алерта
+    static let addHabitAlertAnimationResponse: Double = 0.3
+    static let addHabitAlertAnimationDamping: Double = 0.7
+    
+    // MARK: - CharacterLimitAlertView
+    
+    /// Отступ алерта по горизонтали
+    static let characterLimitAlertHorizontalPadding: CGFloat = 28
+    /// Высота алерта
+    static let characterLimitAlertHeight: CGFloat = 58
+    /// Радиус скругления алерта
+    static let characterLimitAlertCornerRadius: CGFloat = 20
+    /// Размер шрифта алерта
+    static let characterLimitAlertFontSize: CGFloat = 16
+    /// Цвета градиента фона алерта (светлый, тёмный)
+    static let characterLimitAlertGradientTop = Color(red: 1.0, green: 0.612, blue: 0.612)
+    static let characterLimitAlertGradientBottom = Color(red: 0.906, green: 0.329, blue: 0.329)
 }

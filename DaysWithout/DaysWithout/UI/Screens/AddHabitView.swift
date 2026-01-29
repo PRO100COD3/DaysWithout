@@ -37,121 +37,110 @@ struct AddHabitView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                // Заголовок с счетчиком
                 headerView
-                
-                // Поле ввода названия
                 titleInputView
-                    .padding(.top, 12)
-                
-                // Выбор цвета
+                    .padding(.top, Theme.addHabitTitleToInputSpacing)
                 colorSelectionView
-                    .padding(.top, 16)
-                    .padding(.horizontal, 51)
-                
-                // Кнопки действий
+                    .padding(.top, Theme.addHabitInputToColorSpacing)
+                    .padding(.horizontal, Theme.addHabitColorSectionHorizontalPadding)
                 actionButtonsView
-                    .padding(.top, 24)
+                    .padding(.top, Theme.addHabitColorToButtonsSpacing)
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 24)
-            .padding(.bottom, 24)
-            .background(Color.white.opacity(0.85))
-            .cornerRadius(25)
+            .padding(.horizontal, Theme.addHabitContentHorizontalPadding)
+            .padding(.vertical, Theme.addHabitContentVerticalPadding)
+            .background(Color.white.opacity(Theme.addHabitModalBackgroundOpacity))
+            .cornerRadius(Theme.addHabitModalCornerRadius)
             .overlay {
-                RoundedRectangle(cornerRadius: 25)
-                    .stroke(Color.black.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: Theme.addHabitModalCornerRadius)
+                    .stroke(Theme.addHabitModalBorderColor, lineWidth: 1)
             }
-            .shadow(color: Color.black.opacity(0.12), radius: 25, x: 0, y: 10)
+            .shadow(color: Theme.addHabitModalShadowColor, radius: Theme.addHabitModalShadowRadius, x: 0, y: Theme.addHabitModalShadowY)
             .overlay {
-                RoundedRectangle(cornerRadius: 25)
+                RoundedRectangle(cornerRadius: Theme.addHabitModalCornerRadius)
                     .fill(
                         LinearGradient(
-                            colors: [Color.white.opacity(0.05), Color.clear],
+                            colors: [Theme.addHabitModalInnerShadowColor, Color.clear],
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
-                    .offset(y: 4)
-                    .blur(radius: 20)
-                    .mask(RoundedRectangle(cornerRadius: 25))
+                    .offset(y: Theme.addHabitModalInnerShadowOffsetY)
+                    .blur(radius: Theme.addHabitModalInnerShadowBlur)
+                    .mask(RoundedRectangle(cornerRadius: Theme.addHabitModalCornerRadius))
+                    .allowsHitTesting(false)
             }
             .onAppear {
                 viewModel.updateCardsInfo()
             }
             
-            // Алерт поверх модального окна
             VStack {
                 CharacterLimitAlertView(message: alertMessage, isPresented: $showAlert)
                     .transition(.move(edge: .top).combined(with: .opacity))
-                
+                    .padding(.horizontal, Theme.addHabitAlertHorizontalPadding)
                 Spacer()
             }
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: showAlert)
+            .animation(.spring(response: Theme.addHabitAlertAnimationResponse, dampingFraction: Theme.addHabitAlertAnimationDamping), value: showAlert)
         }
     }
     
     // MARK: - Header
     
     private var headerView: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Theme.addHabitHeaderSpacing) {
             Text("Создать привычку")
-                .font(.custom("Onest", size: 16))
+                .font(.custom(Theme.headingFontName, size: Theme.addHabitHeaderFontSize))
                 .fontWeight(.semibold)
-                .foregroundColor(Color(red: 34/255, green: 34/255, blue: 34/255))
-            
+                .foregroundColor(Theme.addHabitHeadingColor)
             Text("\(viewModel.currentCardsCount)/\(viewModel.maxCardsLimit)")
-                .font(.custom("Onest", size: 16))
+                .font(.custom(Theme.headingFontName, size: Theme.addHabitHeaderFontSize))
                 .fontWeight(.medium)
-                .foregroundColor(Color(red: 43/255, green: 43/255, blue: 43/255))
+                .foregroundColor(Theme.addHabitCounterColor)
         }
     }
     
     // MARK: - Title Input
     
     private var titleInputView: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.addHabitInputInternalSpacing) {
             TextField(
-                "Название",
+                Theme.addHabitTitlePlaceholder,
                 text: $viewModel.title
             )
             .multilineTextAlignment(.center)
-            .font(.custom("Onest", size: 14))
+            .font(.custom(Theme.headingFontName, size: Theme.addHabitInputFontSize))
             .fontWeight(.medium)
-            .foregroundColor(Color(red: 156/255, green: 163/255, blue: 175/255))
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(red: 247/255, green: 247/255, blue: 247/255))
+            .foregroundColor(Theme.addHabitInputTextColor)
+            .padding(.horizontal, Theme.addHabitInputPaddingH)
+            .padding(.vertical, Theme.addHabitInputPaddingV)
+            .background(Theme.addHabitInputBackgroundColor)
             .overlay {
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: Theme.addHabitInputCornerRadius)
                     .stroke(
-                        showAlert ? Color(red: 231/255, green: 84/255, blue: 84/255) : Color(red: 230/255, green: 230/255, blue: 230/255),
+                        showAlert ? Theme.addHabitInputBorderColorError : Theme.addHabitInputBorderColorNormal,
                         lineWidth: 1
                     )
             }
-            .cornerRadius(10)
-            .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+            .cornerRadius(Theme.addHabitInputCornerRadius)
+            .shadow(color: Theme.addHabitInputShadowColor, radius: Theme.addHabitInputShadowRadius, x: 0, y: Theme.addHabitInputShadowY)
         }
     }
     
     // MARK: - Color Selection
     
     private var colorSelectionView: some View {
-        VStack(alignment: .center, spacing: 16) {
+        VStack(alignment: .center, spacing: Theme.addHabitColorSectionSpacing) {
             Text("Цвет карточки")
-                .font(.custom(Theme.headingFontName, size: 14))
+                .font(.custom(Theme.headingFontName, size: Theme.addHabitInputFontSize))
                 .fontWeight(.semibold)
-                .foregroundColor(Color(red: 34/255, green: 34/255, blue: 34/255))
-            
-            // Сетка цветов (2 ряда по 4)
+                .foregroundColor(Theme.addHabitHeadingColor)
             LazyVGrid(
                 columns: [
-                    GridItem(.flexible(), spacing: 16),
-                    GridItem(.flexible(), spacing: 16),
-                    GridItem(.flexible(), spacing: 16),
-                    GridItem(.flexible(), spacing: 16)
+                    GridItem(.flexible(), spacing: Theme.addHabitColorSectionSpacing),
+                    GridItem(.flexible(), spacing: Theme.addHabitColorSectionSpacing),
+                    GridItem(.flexible(), spacing: Theme.addHabitColorSectionSpacing),
+                    GridItem(.flexible(), spacing: Theme.addHabitColorSectionSpacing)
                 ],
-                spacing: 16
+                spacing: Theme.addHabitColorSectionSpacing
             ) {
                 ForEach(1...8, id: \.self) { colorID in
                     colorCircle(for: colorID)
@@ -162,28 +151,24 @@ struct AddHabitView: View {
     
     private func colorCircle(for colorID: Int) -> some View {
         let colors = Theme.cardColor(for: colorID)
-        
         return Button(action: {
             viewModel.selectedColorID = colorID
         }) {
             ZStack {
-                // Градиентный фон
                 LinearGradient(
                     colors: [colors.top, colors.bottom],
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(width: 32, height: 32)
+                .frame(width: Theme.addHabitColorCircleSize, height: Theme.addHabitColorCircleSize)
                 .clipShape(Circle())
-                
-                // Обводка для выбранного цвета
                 if viewModel.selectedColorID == colorID {
-                    RoundedRectangle(cornerRadius: 19)
+                    RoundedRectangle(cornerRadius: Theme.addHabitColorCircleSelectedCornerRadius)
                         .stroke(
-                            LinearGradient(colors: [Color(red: 255/255, green: 255/255, blue: 255/255),Color(red: 240/255, green: 240/255, blue: 240/255)], startPoint: .top, endPoint: .bottom),
+                            LinearGradient(colors: Theme.addHabitColorCircleSelectedStrokeColors, startPoint: .top, endPoint: .bottom),
                             lineWidth: 3
                         )
-                        .frame(width: 38, height: 38)
+                        .frame(width: Theme.addHabitColorCircleSelectedSize, height: Theme.addHabitColorCircleSelectedSize)
                 }
             }
         }
@@ -192,42 +177,35 @@ struct AddHabitView: View {
     // MARK: - Action Buttons
     
     private var actionButtonsView: some View {
-        HStack(spacing: 12) {
-            // Кнопка "ОТМЕНА"
-            Button(action: {
-                onDismiss()
-            }) {
+        HStack(spacing: Theme.addHabitButtonsSpacing) {
+            Button(action: { onDismiss() }) {
                 Text("ОТМЕНА")
-                    .font(.custom("Onest", size: 14))
+                    .font(.custom(Theme.headingFontName, size: Theme.addHabitButtonFontSize))
                     .fontWeight(.medium)
-                    .foregroundColor(Color(red: 110/255, green: 110/255, blue: 110/255))
+                    .foregroundColor(Theme.addHabitCancelButtonTextColor)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 44)
-                    .background(Color(red: 242/255, green: 242/255, blue: 242/255))
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+                    .frame(height: Theme.addHabitButtonHeight)
+                    .background(Theme.addHabitCancelButtonBackgroundColor)
+                    .cornerRadius(Theme.addHabitButtonCornerRadius)
+                    .shadow(color: Theme.addHabitInputShadowColor, radius: Theme.addHabitButtonShadowRadius, x: 0, y: Theme.addHabitButtonShadowY)
                     .overlay {
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color(red: 224/255, green: 224/255, blue: 224/255), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: Theme.addHabitButtonCornerRadius)
+                            .stroke(Theme.addHabitCancelButtonBorderColor, lineWidth: 1)
                     }
             }
-            
-            // Кнопка "СОЗДАТЬ"
-            Button(action: {
-                handleCreate()
-            }) {
+            Button(action: { handleCreate() }) {
                 Text("СОЗДАТЬ")
-                    .font(.custom("Onest", size: 14))
+                    .font(.custom(Theme.headingFontName, size: Theme.addHabitButtonFontSize))
                     .fontWeight(.medium)
-                    .foregroundColor(Color(red: 58/255, green: 111/255, blue: 68/255))
+                    .foregroundColor(Theme.addHabitCreateButtonTextColor)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 44)
-                    .background(Color(red: 216/255, green: 241/255, blue: 207/255))
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+                    .frame(height: Theme.addHabitButtonHeight)
+                    .background(Theme.addHabitCreateButtonBackgroundColor)
+                    .cornerRadius(Theme.addHabitButtonCornerRadius)
+                    .shadow(color: Theme.addHabitInputShadowColor, radius: Theme.addHabitButtonShadowRadius, x: 0, y: Theme.addHabitButtonShadowY)
                     .overlay {
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color(red: 212/255, green: 232/255, blue: 217/255).opacity(0.9), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: Theme.addHabitButtonCornerRadius)
+                            .stroke(Theme.addHabitCreateButtonBorderColor, lineWidth: 1)
                     }
             }
         }
@@ -235,59 +213,48 @@ struct AddHabitView: View {
     
     // MARK: - Methods
     
-    /// Обрабатывает создание карточки
+    /// Обрабатывает нажатие "Создать": вызывает ViewModel, отображает результат через Theme
     private func handleCreate() {
-        let trimmed = viewModel.title.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // Проверка на пустое поле
-        if trimmed.isEmpty {
-            showAlert(message: "Введите название")
-            return
-        }
-        
-        // Проверка на превышение лимита
-        if trimmed.count > 17 {
-            showAlert(message: "Максимальное кол-во символов - 17")
-            return
-        }
-        
-        // Создание карточки
-        let result = viewModel.createCard()
-        
-        switch result {
+        switch viewModel.attemptCreate() {
         case .success:
-            hideAlert()
+            dismissAlert()
             onDismiss()
-        case .failure(let error):
-            // Обработка других ошибок
+        case .validationFailed(let reason):
+            presentAlert(alertMessage(for: reason))
+        case .serviceError(let error):
             if case .limitExceeded = error {
-                // Лимит карточек достигнут - можно показать другой алерт
-                hideAlert()
+                dismissAlert()
+                onDismiss()
+            } else if case .titleTooLong(let maxLength) = error {
+                presentAlert(Theme.addHabitAlertMaxCharacters(maxLength))
             } else {
-                // Для других ошибок показываем соответствующий алерт
-                if trimmed.count > 17 {
-                    showAlert(message: "Максимальное кол-во символов - 17")
-                }
+                dismissAlert()
             }
         }
     }
     
-    /// Показывает алерт с сообщением
-    private func showAlert(message: String) {
-        alertMessage = message
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            showAlert = true
-        }
-        
-        // Автоматически скрываем алерт через 3 секунды
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            hideAlert()
+    /// Маппинг причины валидации в строку для UI (Theme)
+    private func alertMessage(for reason: AddHabitValidationReason) -> String {
+        switch reason {
+        case .emptyTitle:
+            return Theme.addHabitAlertEnterTitle
+        case .titleTooLong(let maxLength):
+            return Theme.addHabitAlertMaxCharacters(maxLength)
         }
     }
     
-    /// Скрывает алерт
-    private func hideAlert() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+    private func presentAlert(_ message: String) {
+        alertMessage = message
+        withAnimation(.spring(response: Theme.addHabitAlertAnimationResponse, dampingFraction: Theme.addHabitAlertAnimationDamping)) {
+            showAlert = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + Theme.addHabitAlertDisplayDuration) {
+            dismissAlert()
+        }
+    }
+    
+    private func dismissAlert() {
+        withAnimation(.spring(response: Theme.addHabitAlertAnimationResponse, dampingFraction: Theme.addHabitAlertAnimationDamping)) {
             showAlert = false
         }
     }

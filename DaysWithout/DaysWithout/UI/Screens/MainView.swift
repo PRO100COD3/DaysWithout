@@ -69,14 +69,13 @@ struct MainView: View {
                 .ignoresSafeArea(edges: .bottom)
             }
         }
+        .blur(radius: showAddHabitView ? Theme.addHabitBackdropBlurRadius : 0)
         .overlay {
             if showAddHabitView {
-                // Прозрачный фон с blur эффектом
+                // Задний фон: затемнение rgba(0, 0, 0, 0.3)
                 ZStack {
-                    // Размытый полупрозрачный фон
-                    Color.black.opacity(0.4)
+                    Color.black.opacity(0.3)
                         .ignoresSafeArea()
-                        .background(.ultraThinMaterial)
                         .onTapGesture {
                             withAnimation {
                                 showAddHabitView = false
@@ -97,7 +96,7 @@ struct MainView: View {
                             }
                         )
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 56)
+                        .padding(.horizontal, Theme.addHabitModalHorizontalMargin)
                         
                         Spacer()
                     }
