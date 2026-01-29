@@ -18,12 +18,6 @@ struct AddHabitView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     
-    /// Есть ли ошибка валидации (пустое поле или превышение лимита)
-    private var hasValidationError: Bool {
-        let trimmed = viewModel.title.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty || trimmed.count > 17
-    }
-    
     // MARK: - Initialization
     
     init(
@@ -48,24 +42,40 @@ struct AddHabitView: View {
                 
                 // Поле ввода названия
                 titleInputView
-                    .padding(.top, 24)
+                    .padding(.top, 12)
                 
                 // Выбор цвета
                 colorSelectionView
-                    .padding(.top, 24)
-                
-                Spacer()
+                    .padding(.top, 16)
+                    .padding(.horizontal, 51)
                 
                 // Кнопки действий
                 actionButtonsView
-                    .padding(.bottom, 20)
+                    .padding(.top, 24)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-            .padding(.bottom, 20)
-            .background(Color.white)
-            .cornerRadius(24)
-            .shadow(color: Color.black.opacity(0.25), radius: 30, x: 0, y: 10)
+            .padding(.horizontal, 24)
+            .padding(.top, 24)
+            .padding(.bottom, 24)
+            .background(Color.white.opacity(0.85))
+            .cornerRadius(25)
+            .overlay {
+                RoundedRectangle(cornerRadius: 25)
+                    .stroke(Color.black.opacity(0.2), lineWidth: 1)
+            }
+            .shadow(color: Color.black.opacity(0.12), radius: 25, x: 0, y: 10)
+            .overlay {
+                RoundedRectangle(cornerRadius: 25)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.05), Color.clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .offset(y: 4)
+                    .blur(radius: 20)
+                    .mask(RoundedRectangle(cornerRadius: 25))
+            }
             .onAppear {
                 viewModel.updateCardsInfo()
             }
@@ -86,14 +96,14 @@ struct AddHabitView: View {
     private var headerView: some View {
         HStack(spacing: 12) {
             Text("Создать привычку")
-                .font(.custom(Theme.headingFontName, size: 20))
-                .fontWeight(.bold)
-                .foregroundColor(Theme.mainHeadingColor)
+                .font(.custom("Onest", size: 16))
+                .fontWeight(.semibold)
+                .foregroundColor(Color(red: 34/255, green: 34/255, blue: 34/255))
             
             Text("\(viewModel.currentCardsCount)/\(viewModel.maxCardsLimit)")
-                .font(.custom(Theme.headingFontName, size: 16))
-                .fontWeight(.regular)
-                .foregroundColor(Theme.mainDescriptionColor)
+                .font(.custom("Onest", size: 16))
+                .fontWeight(.medium)
+                .foregroundColor(Color(red: 43/255, green: 43/255, blue: 43/255))
         }
     }
     
@@ -102,43 +112,46 @@ struct AddHabitView: View {
     private var titleInputView: some View {
         VStack(alignment: .leading, spacing: 8) {
             TextField(
-                "Дни без алкоголя",
+                "Название",
                 text: $viewModel.title
             )
-            .font(.custom(Theme.headingFontName, size: 14))
-            .foregroundColor(Theme.mainHeadingColor)
+            .multilineTextAlignment(.center)
+            .font(.custom("Onest", size: 14))
+            .fontWeight(.medium)
+            .foregroundColor(Color(red: 156/255, green: 163/255, blue: 175/255))
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(Color(red: 247/255, green: 247/255, blue: 247/255))
             .overlay {
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(
-                        hasValidationError ? Color(red: 231/255, green: 84/255, blue: 84/255) : Color(red: 230/255, green: 230/255, blue: 230/255),
+                        showAlert ? Color(red: 231/255, green: 84/255, blue: 84/255) : Color(red: 230/255, green: 230/255, blue: 230/255),
                         lineWidth: 1
                     )
             }
             .cornerRadius(10)
+            .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
         }
     }
     
     // MARK: - Color Selection
     
     private var colorSelectionView: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .center, spacing: 16) {
             Text("Цвет карточки")
-                .font(.custom(Theme.headingFontName, size: 16))
-                .fontWeight(.medium)
-                .foregroundColor(Theme.mainHeadingColor)
+                .font(.custom(Theme.headingFontName, size: 14))
+                .fontWeight(.semibold)
+                .foregroundColor(Color(red: 34/255, green: 34/255, blue: 34/255))
             
             // Сетка цветов (2 ряда по 4)
             LazyVGrid(
                 columns: [
-                    GridItem(.flexible(), spacing: 12),
-                    GridItem(.flexible(), spacing: 12),
-                    GridItem(.flexible(), spacing: 12),
-                    GridItem(.flexible(), spacing: 12)
+                    GridItem(.flexible(), spacing: 16),
+                    GridItem(.flexible(), spacing: 16),
+                    GridItem(.flexible(), spacing: 16),
+                    GridItem(.flexible(), spacing: 16)
                 ],
-                spacing: 12
+                spacing: 16
             ) {
                 ForEach(1...8, id: \.self) { colorID in
                     colorCircle(for: colorID)
@@ -160,14 +173,17 @@ struct AddHabitView: View {
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(width: 60, height: 60)
+                .frame(width: 32, height: 32)
                 .clipShape(Circle())
                 
                 // Обводка для выбранного цвета
                 if viewModel.selectedColorID == colorID {
-                    Circle()
-                        .stroke(Color.black, lineWidth: 3)
-                        .frame(width: 60, height: 60)
+                    RoundedRectangle(cornerRadius: 19)
+                        .stroke(
+                            LinearGradient(colors: [Color(red: 255/255, green: 255/255, blue: 255/255),Color(red: 240/255, green: 240/255, blue: 240/255)], startPoint: .top, endPoint: .bottom),
+                            lineWidth: 3
+                        )
+                        .frame(width: 38, height: 38)
                 }
             }
         }
@@ -182,13 +198,18 @@ struct AddHabitView: View {
                 onDismiss()
             }) {
                 Text("ОТМЕНА")
-                    .font(.custom(Theme.headingFontName, size: 16))
-                    .fontWeight(.semibold)
-                    .foregroundColor(Theme.mainHeadingColor)
+                    .font(.custom("Onest", size: 14))
+                    .fontWeight(.medium)
+                    .foregroundColor(Color(red: 110/255, green: 110/255, blue: 110/255))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color(red: 247/255, green: 247/255, blue: 247/255))
+                    .frame(height: 44)
+                    .background(Color(red: 242/255, green: 242/255, blue: 242/255))
                     .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(red: 224/255, green: 224/255, blue: 224/255), lineWidth: 1)
+                    }
             }
             
             // Кнопка "СОЗДАТЬ"
@@ -196,13 +217,18 @@ struct AddHabitView: View {
                 handleCreate()
             }) {
                 Text("СОЗДАТЬ")
-                    .font(.custom(Theme.headingFontName, size: 16))
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .font(.custom("Onest", size: 14))
+                    .fontWeight(.medium)
+                    .foregroundColor(Color(red: 58/255, green: 111/255, blue: 68/255))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Theme.addButtonColor)
+                    .frame(height: 44)
+                    .background(Color(red: 216/255, green: 241/255, blue: 207/255))
                     .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(red: 212/255, green: 232/255, blue: 217/255).opacity(0.9), lineWidth: 1)
+                    }
             }
         }
     }
