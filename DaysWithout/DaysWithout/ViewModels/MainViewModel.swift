@@ -37,6 +37,21 @@ final class MainViewModel: ObservableObject {
         displayableCards.count < maxCardsLimit
     }
     
+    /// Показано ли модальное окно добавления привычки (навигационное состояние)
+    @Published var isAddHabitPresented: Bool = false
+    
+    // MARK: - Navigation
+    
+    /// Показать экран добавления привычки
+    func presentAddHabit() {
+        isAddHabitPresented = true
+    }
+    
+    /// Закрыть экран добавления привычки (после добавления или отмены)
+    func dismissAddHabit() {
+        isAddHabitPresented = false
+    }
+    
     // MARK: - Private Properties
     
     private let habitService: HabitServiceProtocol

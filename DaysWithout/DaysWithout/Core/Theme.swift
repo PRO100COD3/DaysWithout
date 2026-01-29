@@ -348,9 +348,6 @@ enum Theme {
     static let addHabitButtonShadowRadius: CGFloat = 12
     static let addHabitButtonShadowY: CGFloat = 4
     
-    /// Максимальная длина названия привычки (символов); для валидации и алертов (в HabitService — своя константа)
-    static let addHabitMaxTitleLength: Int = 17
-    
     /// Тексты алертов AddHabit (для отображения в UI)
     static let addHabitAlertEnterTitle = "Введите название"
     static func addHabitAlertMaxCharacters(_ maxLength: Int) -> String {

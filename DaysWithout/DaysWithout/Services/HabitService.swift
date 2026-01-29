@@ -64,6 +64,9 @@ protocol HabitServiceProtocol: Sendable {
     /// 
     /// - Returns: `true`, если текущее количество карточек меньше лимита
     func canCreateNewCard() -> Bool
+    
+    /// Максимальная длина названия привычки (символов)
+    var maxTitleLength: Int { get }
 }
 
 /// Ошибки сервиса управления карточками
@@ -109,10 +112,10 @@ enum HabitServiceError: LocalizedError, Sendable {
 /// Содержит всю бизнес-логику работы с карточками, включая валидацию и проверку лимитов.
 final class HabitService: HabitServiceProtocol {
     
-    // MARK: - Constants
+    // MARK: - HabitServiceProtocol (maxTitleLength)
     
     /// Максимальная длина названия привычки
-    private let maxTitleLength = 17
+    var maxTitleLength: Int { 17 }
     
     // MARK: - Private Properties
     

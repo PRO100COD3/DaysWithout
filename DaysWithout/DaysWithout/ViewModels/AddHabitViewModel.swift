@@ -43,8 +43,8 @@ final class AddHabitViewModel: ObservableObject {
     /// Максимальное количество карточек (для отображения лимита)
     @Published private(set) var maxCardsLimit: Int = 3
     
-    /// Максимальная длина названия (из Theme; в HabitService — своя константа)
-    var maxTitleLength: Int { Theme.addHabitMaxTitleLength }
+    /// Максимальная длина названия (из HabitService)
+    var maxTitleLength: Int { habitService.maxTitleLength }
     
     // MARK: - Private Properties
     
@@ -88,8 +88,8 @@ final class AddHabitViewModel: ObservableObject {
         if trimmed.isEmpty {
             return .validationFailed(.emptyTitle)
         }
-        if trimmed.count > Theme.addHabitMaxTitleLength {
-            return .validationFailed(.titleTooLong(maxLength: Theme.addHabitMaxTitleLength))
+        if trimmed.count > maxTitleLength {
+            return .validationFailed(.titleTooLong(maxLength: maxTitleLength))
         }
         
         switch createCard() {
@@ -146,7 +146,7 @@ final class AddHabitViewModel: ObservableObject {
             return false
         }
         
-        guard trimmedTitle.count <= Theme.addHabitMaxTitleLength else {
+        guard trimmedTitle.count <= maxTitleLength else {
             return false
         }
         

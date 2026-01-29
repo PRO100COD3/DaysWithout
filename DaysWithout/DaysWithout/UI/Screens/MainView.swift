@@ -14,7 +14,6 @@ struct MainView: View {
     // MARK: - Properties
     
     @StateObject private var viewModel: MainViewModel
-    @State private var showAddHabitView = false
     
     // MARK: - Initialization
     
@@ -60,7 +59,7 @@ struct MainView: View {
                     HStack {
                         Spacer()
                         AddHabitButtonView(onTap: {
-                            showAddHabitView = true
+                            viewModel.presentAddHabit()
                         })
                         .padding(.trailing, Theme.buttonPadding)
                         .padding(.bottom, Theme.buttonPadding)
@@ -69,16 +68,16 @@ struct MainView: View {
                 .ignoresSafeArea(edges: .bottom)
             }
         }
-        .blur(radius: showAddHabitView ? Theme.addHabitBackdropBlurRadius : 0)
+        .blur(radius: viewModel.isAddHabitPresented ? Theme.addHabitBackdropBlurRadius : 0)
         .overlay {
-            if showAddHabitView {
+            if viewModel.isAddHabitPresented {
                 // Задний фон: затемнение rgba(0, 0, 0, 0.3)
                 ZStack {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
                         .onTapGesture {
                             withAnimation {
-                                showAddHabitView = false
+                                viewModel.dismissAddHabit()
                             }
                         }
                     
@@ -91,7 +90,7 @@ struct MainView: View {
                             userStatusProvider: userStatusProvider,
                             onDismiss: {
                                 withAnimation {
-                                    showAddHabitView = false
+                                    viewModel.dismissAddHabit()
                                 }
                             }
                         )
