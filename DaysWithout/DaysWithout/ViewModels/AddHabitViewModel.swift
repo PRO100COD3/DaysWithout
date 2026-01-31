@@ -14,15 +14,8 @@ enum AddHabitValidationReason: Sendable {
     case titleTooLong(maxLength: Int)
 }
 
-/// Результат попытки создания карточки
-enum AddHabitCreateOutcome: Sendable {
-    case success
-    case validationFailed(AddHabitValidationReason)
-    case serviceError(HabitServiceError)
-}
-
 /// ViewModel для экрана добавления привычки
-/// Содержит логику валидации и создания карточки; не содержит UI-строк
+/// Содержит логику валидации, создания карточки и состояния алерта; не содержит UI-строк
 @MainActor
 final class AddHabitViewModel: ObservableObject {
 
@@ -46,12 +39,19 @@ final class AddHabitViewModel: ObservableObject {
     /// Максимальная длина названия (из HabitService)
     var maxTitleLength: Int { habitService.maxTitleLength }
     
+    /// Сообщение алерта валидации (nil = алерт скрыт). View только отображает по биндингу.
+    @Published private(set) var alertMessage: String?
+    
     // MARK: - Private Properties
     
     private let habitService: HabitServiceProtocol
     private let userStatusProvider: UserStatusProvider
+    private let onDismiss: () -> Void
+    private let alertDisplayDuration: TimeInterval
+    private let alertMessageForValidation: (AddHabitValidationReason) -> String
+    private let alertMessageForServiceError: (HabitServiceError) -> String?
     private var cancellables = Set<AnyCancellable>()
-
+    private var alertDismissWorkItem: DispatchWorkItem?
     
     // MARK: - Initialization
     
@@ -59,17 +59,27 @@ final class AddHabitViewModel: ObservableObject {
     /// - Parameters:
     ///   - habitService: Сервис для работы с карточками
     ///   - userStatusProvider: Провайдер статуса пользователя
+    ///   - onDismiss: Замыкание для закрытия экрана (вызывается при успехе или limitExceeded)
+    ///   - alertDisplayDuration: Длительность показа алерта (сек)
+    ///   - alertMessageForValidation: Маппинг причины валидации в строку для UI
+    ///   - alertMessageForServiceError: Маппинг ошибки сервиса в строку для алерта (nil = не показывать)
     init(
         habitService: HabitServiceProtocol,
-        userStatusProvider: UserStatusProvider
+        userStatusProvider: UserStatusProvider,
+        onDismiss: @escaping () -> Void,
+        alertDisplayDuration: TimeInterval,
+        alertMessageForValidation: @escaping (AddHabitValidationReason) -> String,
+        alertMessageForServiceError: @escaping (HabitServiceError) -> String?
     ) {
         self.habitService = habitService
         self.userStatusProvider = userStatusProvider
+        self.onDismiss = onDismiss
+        self.alertDisplayDuration = alertDisplayDuration
+        self.alertMessageForValidation = alertMessageForValidation
+        self.alertMessageForServiceError = alertMessageForServiceError
         
-        // Загружаем начальные данные
         updateCardsInfo()
         
-        // Подписываемся на изменения названия для валидации
         $title
             .sink { [weak self] _ in
                 guard let self = self else { return }
@@ -80,24 +90,54 @@ final class AddHabitViewModel: ObservableObject {
     
     // MARK: - Public Methods
     
-    /// Пытается создать карточку: валидация в ViewModel, результат без UI-строк.
-    /// View отображает сообщения через Theme по ValidationReason.
-    /// - Returns: Успех, причина валидации или ошибка сервиса
-    func attemptCreate() -> AddHabitCreateOutcome {
+    /// Пытается создать карточку. Обрабатывает результат внутри: показывает алерт или закрывает экран.
+    /// View только биндится к alertMessage и отображает состояние.
+    func attemptCreate() {
         let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
-            return .validationFailed(.emptyTitle)
+            showAlertTemporarily(alertMessageForValidation(.emptyTitle))
+            return
         }
         if trimmed.count > maxTitleLength {
-            return .validationFailed(.titleTooLong(maxLength: maxTitleLength))
+            showAlertTemporarily(alertMessageForValidation(.titleTooLong(maxLength: maxTitleLength)))
+            return
         }
         
         switch createCard() {
         case .success:
-            return .success
+            onDismiss()
         case .failure(let error):
-            return .serviceError(error)
+            if case .limitExceeded = error {
+                onDismiss()
+            } else if let message = alertMessageForServiceError(error), !message.isEmpty {
+                showAlertTemporarily(message)
+            } else {
+                clearAlert()
+            }
         }
+    }
+    
+    /// Скрыть алерт (вызывается из View при необходимости)
+    func clearAlert() {
+        cancelAlertTimer()
+        alertMessage = nil
+    }
+    
+    // MARK: - Private Methods
+    
+    private func showAlertTemporarily(_ message: String) {
+        cancelAlertTimer()
+        alertMessage = message
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.alertMessage = nil
+        }
+        alertDismissWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + alertDisplayDuration, execute: workItem)
+    }
+    
+    private func cancelAlertTimer() {
+        alertDismissWorkItem?.cancel()
+        alertDismissWorkItem = nil
     }
     
     /// Создаёт новую карточку привычки (внутренний метод; вызывается после валидации)

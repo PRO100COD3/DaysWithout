@@ -15,8 +15,6 @@ struct AddHabitView: View {
     
     @StateObject private var viewModel: AddHabitViewModel
     var onDismiss: () -> Void
-    @State private var showAlert = false
-    @State private var alertMessage = ""
     
     // MARK: - Initialization
     
@@ -28,7 +26,25 @@ struct AddHabitView: View {
         self.onDismiss = onDismiss
         _viewModel = StateObject(wrappedValue: AddHabitViewModel(
             habitService: habitService,
-            userStatusProvider: userStatusProvider
+            userStatusProvider: userStatusProvider,
+            onDismiss: onDismiss,
+            alertDisplayDuration: Theme.addHabitAlertDisplayDuration,
+            alertMessageForValidation: { reason in
+                switch reason {
+                case .emptyTitle:
+                    return Theme.addHabitAlertEnterTitle
+                case .titleTooLong(let maxLength):
+                    return Theme.addHabitAlertMaxCharacters(maxLength)
+                }
+            },
+            alertMessageForServiceError: { error in
+                switch error {
+                case .titleTooLong(let maxLength):
+                    return Theme.addHabitAlertMaxCharacters(maxLength)
+                default:
+                    return nil
+                }
+            }
         ))
     }
     
@@ -74,12 +90,18 @@ struct AddHabitView: View {
             }
             
             VStack {
-                CharacterLimitAlertView(message: alertMessage, isPresented: $showAlert)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                if let message = viewModel.alertMessage {
+                    CharacterLimitAlertView(
+                        message: message,
+                        isPresented: Binding(
+                            get: { viewModel.alertMessage != nil },
+                            set: { if !$0 { viewModel.clearAlert() } }
+                        )
+                    )
                     .padding(.horizontal, Theme.addHabitAlertHorizontalPadding)
+                }
                 Spacer()
             }
-            .animation(.spring(response: Theme.addHabitAlertAnimationResponse, dampingFraction: Theme.addHabitAlertAnimationDamping), value: showAlert)
         }
     }
     
@@ -116,7 +138,7 @@ struct AddHabitView: View {
             .overlay {
                 RoundedRectangle(cornerRadius: Theme.addHabitInputCornerRadius)
                     .stroke(
-                        showAlert ? Theme.addHabitInputBorderColorError : Theme.addHabitInputBorderColorNormal,
+                        viewModel.alertMessage != nil ? Theme.addHabitInputBorderColorError : Theme.addHabitInputBorderColorNormal,
                         lineWidth: 1
                     )
             }
@@ -193,7 +215,7 @@ struct AddHabitView: View {
                             .stroke(Theme.addHabitCancelButtonBorderColor, lineWidth: 1)
                     }
             }
-            Button(action: { handleCreate() }) {
+            Button(action: { viewModel.attemptCreate() }) {
                 Text("СОЗДАТЬ")
                     .font(.custom(Theme.headingFontName, size: Theme.addHabitButtonFontSize))
                     .fontWeight(.medium)
@@ -211,53 +233,6 @@ struct AddHabitView: View {
         }
     }
     
-    // MARK: - Methods
-    
-    /// Обрабатывает нажатие "Создать": вызывает ViewModel, отображает результат через Theme
-    private func handleCreate() {
-        switch viewModel.attemptCreate() {
-        case .success:
-            dismissAlert()
-            onDismiss()
-        case .validationFailed(let reason):
-            presentAlert(alertMessage(for: reason))
-        case .serviceError(let error):
-            if case .limitExceeded = error {
-                dismissAlert()
-                onDismiss()
-            } else if case .titleTooLong(let maxLength) = error {
-                presentAlert(Theme.addHabitAlertMaxCharacters(maxLength))
-            } else {
-                dismissAlert()
-            }
-        }
-    }
-    
-    /// Маппинг причины валидации в строку для UI (Theme)
-    private func alertMessage(for reason: AddHabitValidationReason) -> String {
-        switch reason {
-        case .emptyTitle:
-            return Theme.addHabitAlertEnterTitle
-        case .titleTooLong(let maxLength):
-            return Theme.addHabitAlertMaxCharacters(maxLength)
-        }
-    }
-    
-    private func presentAlert(_ message: String) {
-        alertMessage = message
-        withAnimation(.spring(response: Theme.addHabitAlertAnimationResponse, dampingFraction: Theme.addHabitAlertAnimationDamping)) {
-            showAlert = true
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + Theme.addHabitAlertDisplayDuration) {
-            dismissAlert()
-        }
-    }
-    
-    private func dismissAlert() {
-        withAnimation(.spring(response: Theme.addHabitAlertAnimationResponse, dampingFraction: Theme.addHabitAlertAnimationDamping)) {
-            showAlert = false
-        }
-    }
 }
 
 // MARK: - Preview

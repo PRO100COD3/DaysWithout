@@ -64,14 +64,9 @@ struct AddHabitButtonView: View {
     
     /// Обрабатывает нажатие на кнопку
     private func handlePress() {
-        withAnimation(Theme.pressAnimationType) {
-            isPressed = true
-        }
-        
+        isPressed = true
         DispatchQueue.main.asyncAfter(deadline: .now() + Theme.pressAnimationDuration) {
-            withAnimation(Theme.pressAnimationType) {
-                isPressed = false
-            }
+            isPressed = false
         }
         
         // Вызываем callback для открытия экрана добавления

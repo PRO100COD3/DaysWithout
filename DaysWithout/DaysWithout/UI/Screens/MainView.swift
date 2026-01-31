@@ -76,9 +76,7 @@ struct MainView: View {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
                         .onTapGesture {
-                            withAnimation {
-                                viewModel.dismissAddHabit()
-                            }
+                            viewModel.dismissAddHabit()
                         }
                     
                     // Модальное окно по центру
@@ -89,9 +87,7 @@ struct MainView: View {
                             habitService: habitService,
                             userStatusProvider: userStatusProvider,
                             onDismiss: {
-                                withAnimation {
-                                    viewModel.dismissAddHabit()
-                                }
+                                viewModel.dismissAddHabit()
                             }
                         )
                         .frame(maxWidth: .infinity)
@@ -100,8 +96,21 @@ struct MainView: View {
                         Spacer()
                     }
                 }
-                .transition(.opacity)
                 .zIndex(1000)
+            }
+        }
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { viewModel.selectedCardForTimer != nil },
+                set: { if !$0 { viewModel.dismissTimer() } }
+            )
+        ) {
+            if let card = viewModel.selectedCardForTimer {
+                TimerView(
+                    card: card,
+                    habitService: habitService,
+                    onDismiss: { viewModel.dismissTimer() }
+                )
             }
         }
     }
@@ -168,8 +177,12 @@ struct MainView: View {
             ) {
                 // Отображаем карточки с учетом лимита статуса пользователя
                 ForEach(viewModel.displayableCards) { card in
-                    HabitCardView(card: card, timerService: timerService)
-                        .frame(height: Theme.cardHeight)
+                    HabitCardView(
+                        card: card,
+                        timerService: timerService,
+                        onTap: { viewModel.presentTimer(card: $0) }
+                    )
+                    .frame(height: Theme.cardHeight)
                 }
             }
             .padding(.horizontal, Theme.screenPadding)

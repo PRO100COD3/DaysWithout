@@ -356,9 +356,13 @@ enum Theme {
     
     /// Длительность показа алерта (сек)
     static let addHabitAlertDisplayDuration: TimeInterval = 3
-    /// Анимация алерта
+    /// Параметры анимации алерта
     static let addHabitAlertAnimationResponse: Double = 0.3
     static let addHabitAlertAnimationDamping: Double = 0.7
+    /// Анимация появления/исчезновения алерта (централизовано)
+    static var addHabitAlertAnimation: Animation {
+        .spring(response: addHabitAlertAnimationResponse, dampingFraction: addHabitAlertAnimationDamping)
+    }
     
     // MARK: - CharacterLimitAlertView
     
@@ -373,4 +377,7 @@ enum Theme {
     /// Цвета градиента фона алерта (светлый, тёмный)
     static let characterLimitAlertGradientTop = Color(red: 1.0, green: 0.612, blue: 0.612)
     static let characterLimitAlertGradientBottom = Color(red: 0.906, green: 0.329, blue: 0.329)
+    
+    /// Цвет красной кнопки (диалоги удаления/рестарта)
+    static let redButton = Color(red: 231/255, green: 84/255, blue: 84/255)
 }

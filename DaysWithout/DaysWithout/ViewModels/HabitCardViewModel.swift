@@ -21,6 +21,9 @@ final class HabitCardViewModel: ObservableObject {
     /// Значение прогресса для прогресс-ринга (0.0 - 1.0)
     @Published private(set) var progressValue: Double = 0.0
     
+    /// Состояние нажатия (для анимации; таймер реверта управляется во ViewModel)
+    @Published private(set) var isPressed: Bool = false
+    
     // MARK: - Private Properties
     
     private let card: HabitCard
@@ -51,6 +54,15 @@ final class HabitCardViewModel: ObservableObject {
         let hours = totalSeconds / 3600
         let minutes = (totalSeconds % 3600) / 60
         return String(format: "%02d:%02d", hours, minutes)
+    }
+    
+    /// Запускает анимацию нажатия: устанавливает isPressed = true, через duration возвращает false.
+    /// Длительность передаётся из View (Theme), чтобы ViewModel не зависел от UI.
+    func triggerPress(duration: TimeInterval) {
+        isPressed = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+            self?.isPressed = false
+        }
     }
     
     // MARK: - Private Methods

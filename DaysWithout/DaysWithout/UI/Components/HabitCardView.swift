@@ -16,15 +16,16 @@ struct HabitCardView: View {
     
     let card: HabitCard
     let timerService: TimerServiceProtocol
+    var onTap: ((HabitCard) -> Void)?
     
     @StateObject private var viewModel: HabitCardViewModel
-    @State private var isPressed = false
     
     // MARK: - Initialization
     
-    init(card: HabitCard, timerService: TimerServiceProtocol) {
+    init(card: HabitCard, timerService: TimerServiceProtocol, onTap: ((HabitCard) -> Void)? = nil) {
         self.card = card
         self.timerService = timerService
+        self.onTap = onTap
         _viewModel = StateObject(wrappedValue: HabitCardViewModel(
             card: card,
             timerService: timerService
@@ -72,10 +73,11 @@ struct HabitCardView: View {
             .padding(.top, Theme.cardContentTopPadding)
             .padding(.bottom, Theme.cardContentBottomPadding)
         }
-        .scaleEffect(isPressed ? Theme.cardPressScale : 1.0)
-        .opacity(isPressed ? Theme.cardPressOpacity : 1.0)
+        .scaleEffect(viewModel.isPressed ? Theme.cardPressScale : 1.0)
+        .opacity(viewModel.isPressed ? Theme.cardPressOpacity : 1.0)
         .onTapGesture {
-            handlePress()
+            viewModel.triggerPress(duration: Theme.pressAnimationDuration)
+            onTap?(card)
         }
     }
     
@@ -129,20 +131,6 @@ struct HabitCardView: View {
             .frame(maxWidth: .infinity, alignment: .center)
     }
     
-    // MARK: - Methods
-    
-    /// Обрабатывает нажатие на карточку
-    private func handlePress() {
-        withAnimation(Theme.pressAnimationType) {
-            isPressed = true
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + Theme.pressAnimationDuration) {
-            withAnimation(Theme.pressAnimationType) {
-                isPressed = false
-            }
-        }
-    }
 }
 
 // MARK: - Preview

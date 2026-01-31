@@ -40,6 +40,9 @@ final class MainViewModel: ObservableObject {
     /// Показано ли модальное окно добавления привычки (навигационное состояние)
     @Published var isAddHabitPresented: Bool = false
     
+    /// Карточка, для которой открыт экран таймера (nil = экран Timer не показан)
+    @Published var selectedCardForTimer: HabitCard?
+    
     // MARK: - Navigation
     
     /// Показать экран добавления привычки
@@ -50,6 +53,16 @@ final class MainViewModel: ObservableObject {
     /// Закрыть экран добавления привычки (после добавления или отмены)
     func dismissAddHabit() {
         isAddHabitPresented = false
+    }
+    
+    /// Показать экран таймера для карточки привычки
+    func presentTimer(card: HabitCard) {
+        selectedCardForTimer = card
+    }
+    
+    /// Закрыть экран таймера
+    func dismissTimer() {
+        selectedCardForTimer = nil
     }
     
     // MARK: - Private Properties
