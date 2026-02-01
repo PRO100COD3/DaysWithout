@@ -367,7 +367,7 @@ enum Theme {
     // MARK: - CharacterLimitAlertView
     
     /// Отступ алерта по горизонтали
-    static let characterLimitAlertHorizontalPadding: CGFloat = 28
+    static let characterLimitAlertHorizontalPadding: CGFloat = 25
     /// Высота алерта
     static let characterLimitAlertHeight: CGFloat = 58
     /// Радиус скругления алерта
