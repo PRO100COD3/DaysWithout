@@ -102,7 +102,7 @@ struct MainView: View {
         .fullScreenCover(
             isPresented: Binding(
                 get: { viewModel.selectedCardForTimer != nil },
-                set: { if !$0 { viewModel.dismissTimer() } }
+                set: { if !$0 { DispatchQueue.main.async { viewModel.dismissTimer() } } }
             )
         ) {
             if let card = viewModel.selectedCardForTimer {

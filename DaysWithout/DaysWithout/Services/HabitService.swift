@@ -67,6 +67,18 @@ protocol HabitServiceProtocol: Sendable {
     
     /// Максимальная длина названия привычки (символов)
     var maxTitleLength: Int { get }
+    
+    /// Обновляет дату начала отслеживания для карточки (рестарт). Main и Timer используют одну дату из хранилища.
+    /// - Parameters:
+    ///   - id: UUID карточки
+    ///   - startDate: Новая дата начала
+    func updateStartDate(id: UUID, startDate: Date) throws
+    
+    /// Обновляет название карточки привычки.
+    /// - Parameters:
+    ///   - id: UUID карточки
+    ///   - title: Новое название (максимум maxTitleLength символов)
+    func updateTitle(id: UUID, title: String) throws
 }
 
 /// Ошибки сервиса управления карточками
@@ -228,6 +240,41 @@ final class HabitService: HabitServiceProtocol {
     func canCreateNewCard() -> Bool {
         let status = userStatusProvider.getCurrentStatus()
         return cards.count < status.maxCardsLimit
+    }
+    
+    /// Обновляет дату начала отслеживания для карточки
+    func updateStartDate(id: UUID, startDate: Date) throws {
+        guard let index = cards.firstIndex(where: { $0.id == id }) else {
+            throw HabitServiceError.cardNotFound(id: id)
+        }
+        let old = cards[index]
+        let updated = HabitCard(id: old.id, title: old.title, startDate: startDate, colorID: old.colorID)
+        cards[index] = updated
+        do {
+            try storageService.saveCards(cards)
+        } catch {
+            cards[index] = old
+            throw HabitServiceError.saveError(underlying: error)
+        }
+    }
+    
+    /// Обновляет название карточки
+    func updateTitle(id: UUID, title: String) throws {
+        guard title.count <= maxTitleLength else {
+            throw HabitServiceError.titleTooLong(maxLength: maxTitleLength)
+        }
+        guard let index = cards.firstIndex(where: { $0.id == id }) else {
+            throw HabitServiceError.cardNotFound(id: id)
+        }
+        let old = cards[index]
+        let updated = HabitCard(id: old.id, title: title, startDate: old.startDate, colorID: old.colorID)
+        cards[index] = updated
+        do {
+            try storageService.saveCards(cards)
+        } catch {
+            cards[index] = old
+            throw HabitServiceError.saveError(underlying: error)
+        }
     }
     
     // MARK: - Private Methods

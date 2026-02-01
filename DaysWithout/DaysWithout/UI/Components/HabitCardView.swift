@@ -79,6 +79,9 @@ struct HabitCardView: View {
             viewModel.triggerPress(duration: Theme.pressAnimationDuration)
             onTap?(card)
         }
+        .onChange(of: card.startDate) { _ in
+            viewModel.updateCard(card)
+        }
     }
     
     // MARK: - Progress Ring

@@ -84,6 +84,12 @@ final class TimerViewModel: ObservableObject {
         
         userDefaults.set(text, forKey: timerTextKey)
         
+        do {
+            try habitService.updateTitle(id: card.id, title: text)
+        } catch {
+            // Игнорируем ошибку (карточка могла быть удалена или невалидное название)
+        }
+        
         if isRunning {
             saveTimerState()
         }
@@ -116,11 +122,19 @@ final class TimerViewModel: ObservableObject {
     
     func confirmRestart() {
         let wasRunning = isRunning
+        let newStartDate = Date()
+        
+        do {
+            try habitService.updateStartDate(id: card.id, startDate: newStartDate)
+        } catch {
+            // Игнорируем ошибку обновления (карточка могла быть удалена)
+        }
+        
         stopTimer()
         days = 0
         elapsedSeconds = 0
         restartReason = ""
-        startDate = nil
+        startDate = newStartDate
         savedDays = 0
         savedElapsedSeconds = 0
         clearTimerState()
@@ -235,19 +249,21 @@ final class TimerViewModel: ObservableObject {
     
     private func loadTimerState() {
         if let savedStartDate = userDefaults.object(forKey: startDateKey) as? Date {
+            // Есть сохранённое время — показываем РЕСТАРТ
+            hasStarted = true
             startDate = savedStartDate
             savedDays = userDefaults.integer(forKey: savedDaysKey)
             savedElapsedSeconds = userDefaults.double(forKey: savedElapsedSecondsKey)
             let wasRunning = userDefaults.bool(forKey: isRunningKey)
             isRunning = wasRunning
-            hasStarted = wasRunning
             
             if let savedText = userDefaults.string(forKey: timerTextKey), !savedText.isEmpty {
                 text = savedText
             }
             
+            updateElapsedTime()
             if wasRunning {
-                updateElapsedTime()
+                // Таймер был запущен — сразу возобновляем
                 timer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
                     guard let self = self else { return }
                     Task { @MainActor in
@@ -256,12 +272,13 @@ final class TimerViewModel: ObservableObject {
                 }
             }
         } else {
+            // Инициализация из карточки: дни и время в текущем 24h-периоде
             days = card.daysCount
             startDate = card.startDate
             savedDays = card.daysCount
-            let elapsed = Date().timeIntervalSince(card.startDate)
-            savedElapsedSeconds = elapsed.truncatingRemainder(dividingBy: targetSeconds)
-            elapsedSeconds = savedElapsedSeconds
+            savedElapsedSeconds = 0
+            let totalElapsed = Date().timeIntervalSince(card.startDate)
+            elapsedSeconds = totalElapsed.truncatingRemainder(dividingBy: targetSeconds)
         }
     }
     

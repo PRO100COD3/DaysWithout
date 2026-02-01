@@ -26,7 +26,7 @@ final class HabitCardViewModel: ObservableObject {
     
     // MARK: - Private Properties
     
-    private let card: HabitCard
+    private var card: HabitCard
     private let timerService: TimerServiceProtocol
     private var cancellables = Set<AnyCancellable>()
     private var updateTimer: Timer?
@@ -54,6 +54,12 @@ final class HabitCardViewModel: ObservableObject {
         let hours = totalSeconds / 3600
         let minutes = (totalSeconds % 3600) / 60
         return String(format: "%02d:%02d", hours, minutes)
+    }
+    
+    /// Обновляет карточку (например, после рестарта на экране Timer). Пересчитывает прогресс и таймер.
+    func updateCard(_ card: HabitCard) {
+        self.card = card
+        updateValues()
     }
     
     /// Запускает анимацию нажатия: устанавливает isPressed = true, через duration возвращает false.
