@@ -19,6 +19,8 @@ final class TimerViewModel: ObservableObject {
     @Published var restartReason: String = ""
     @Published var showRestartReasonLimitAlert = false
     @Published var shouldShowCloseDialog = false
+    @Published var isStoryPresented = false
+    @Published var isDatePickerPresented = false
     
     private var hasStarted = false
     private var restartReasonAlertHideTask: DispatchWorkItem?
@@ -29,6 +31,8 @@ final class TimerViewModel: ObservableObject {
     
     private let card: HabitCard
     private let habitService: HabitServiceProtocol
+    private let restartHistoryService: RestartHistoryServiceProtocol
+    private let onClose: () -> Void
     private let userDefaults = UserDefaults.standard
     private let startDateKey: String
     private let savedDaysKey: String
@@ -45,9 +49,11 @@ final class TimerViewModel: ObservableObject {
     private let targetSeconds: TimeInterval = 24 * 60 * 60
     private var alertHideTask: DispatchWorkItem?
     
-    init(card: HabitCard, habitService: HabitServiceProtocol) {
+    init(card: HabitCard, habitService: HabitServiceProtocol, restartHistoryService: RestartHistoryServiceProtocol, onClose: @escaping () -> Void) {
         self.card = card
         self.habitService = habitService
+        self.restartHistoryService = restartHistoryService
+        self.onClose = onClose
         let prefix = "Timer_\(card.id.uuidString)"
         self.startDateKey = "\(prefix)_StartDate"
         self.savedDaysKey = "\(prefix)_SavedDays"
@@ -72,6 +78,49 @@ final class TimerViewModel: ObservableObject {
     
     var shouldShowRestart: Bool {
         hasStarted
+    }
+    
+    /// Карточка и сервис истории для экрана Story (доступ только для отображения).
+    var cardForStory: HabitCard { card }
+    var restartHistoryServiceForStory: RestartHistoryServiceProtocol { restartHistoryService }
+    
+    /// Начальная дата для экрана выбора даты (текущая дата начала отсчёта).
+    var initialDateForDatePicker: Date { startDate ?? card.startDate }
+    
+    /// Обработка нажатия главной кнопки (СТАРТ или РЕСТАРТ).
+    func handleMainButtonTap() {
+        if shouldShowRestart {
+            showRestartDialog()
+        } else {
+            startTimer()
+        }
+    }
+    
+    func presentStory() {
+        isStoryPresented = true
+    }
+    
+    func dismissStory() {
+        isStoryPresented = false
+    }
+    
+    func presentDatePicker() {
+        isDatePickerPresented = true
+    }
+    
+    func dismissDatePicker() {
+        isDatePickerPresented = false
+    }
+    
+    /// Вызывается после выбора даты в DateView: сохраняет дату в HabitService и перезагружает состояние таймера.
+    func applyNewStartDateAndDismissPicker(_ newStartDate: Date) {
+        do {
+            try habitService.updateStartDate(id: card.id, startDate: newStartDate)
+        } catch {
+            // Игнорируем ошибку (карточка могла быть удалена)
+        }
+        reloadAfterStartDateChange(newStartDate: newStartDate)
+        isDatePickerPresented = false
     }
     
     func handleTextChange(_ newValue: String) {
@@ -123,6 +172,15 @@ final class TimerViewModel: ObservableObject {
     func confirmRestart() {
         let wasRunning = isRunning
         let newStartDate = Date()
+        let periodStart = startDate ?? card.startDate
+        
+        let record = RestartRecord(
+            days: days,
+            reason: restartReason,
+            periodStart: periodStart,
+            periodEnd: newStartDate
+        )
+        restartHistoryService.addRecord(cardId: card.id, record: record)
         
         do {
             try habitService.updateStartDate(id: card.id, startDate: newStartDate)
@@ -165,6 +223,12 @@ final class TimerViewModel: ObservableObject {
     
     func confirmClose() {
         shouldShowCloseDialog = false
+        do {
+            try habitService.delete(id: card.id)
+        } catch {
+            // Игнорируем ошибку (карточка могла быть уже удалена)
+        }
+        onClose()
     }
     
     func cancelClose() {
@@ -298,6 +362,19 @@ final class TimerViewModel: ObservableObject {
         userDefaults.removeObject(forKey: savedElapsedSecondsKey)
         userDefaults.removeObject(forKey: isRunningKey)
         userDefaults.removeObject(forKey: timerTextKey)
+    }
+    
+    /// Перезагрузка состояния таймера после смены даты начала (из DateView).
+    private func reloadAfterStartDateChange(newStartDate: Date) {
+        stopTimer()
+        startDate = newStartDate
+        savedDays = 0
+        savedElapsedSeconds = 0
+        hasStarted = true
+        let totalElapsed = Date().timeIntervalSince(newStartDate)
+        days = Int(totalElapsed / targetSeconds)
+        elapsedSeconds = totalElapsed.truncatingRemainder(dividingBy: targetSeconds)
+        saveTimerState()
     }
     
     private func showCharacterLimitAlert() {

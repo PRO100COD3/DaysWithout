@@ -9,15 +9,17 @@ import SwiftUI
 struct TimerView: View {
     let card: HabitCard
     let habitService: HabitServiceProtocol
+    let restartHistoryService: RestartHistoryServiceProtocol
     let onDismiss: () -> Void
     
     @StateObject private var viewModel: TimerViewModel
     
-    init(card: HabitCard, habitService: HabitServiceProtocol, onDismiss: @escaping () -> Void) {
+    init(card: HabitCard, habitService: HabitServiceProtocol, restartHistoryService: RestartHistoryServiceProtocol, onDismiss: @escaping () -> Void) {
         self.card = card
         self.habitService = habitService
+        self.restartHistoryService = restartHistoryService
         self.onDismiss = onDismiss
-        _viewModel = StateObject(wrappedValue: TimerViewModel(card: card, habitService: habitService))
+        _viewModel = StateObject(wrappedValue: TimerViewModel(card: card, habitService: habitService, restartHistoryService: restartHistoryService, onClose: onDismiss))
     }
     
     var body: some View {
@@ -72,13 +74,7 @@ struct TimerView: View {
                     )
                     .padding(.top, 53)
                     
-                    Button(action: {
-                        if viewModel.shouldShowRestart {
-                            viewModel.showRestartDialog()
-                        } else {
-                            viewModel.startTimer()
-                        }
-                    }) {
+                    Button(action: viewModel.handleMainButtonTap) {
                         Text(viewModel.shouldShowRestart ? "РЕСТАРТ" : "СТАРТ")
                             .font(.custom("Onest", size: 20))
                             .fontWeight(.regular)
@@ -102,9 +98,7 @@ struct TimerView: View {
                     .pressAnimation()
                     
                     HStack(spacing: 80) {
-                        Button(action: {
-                            // Действие для первой кнопки
-                        }) {
+                        Button(action: viewModel.presentStory) {
                             Image("book")
                                 .font(.system(size: 24))
                                 .foregroundColor(.white)
@@ -113,9 +107,7 @@ struct TimerView: View {
                         }
                         .pressAnimation()
                         
-                        Button(action: {
-                            // Действие для второй кнопки
-                        }) {
+                        Button(action: viewModel.presentDatePicker) {
                             Image("time")
                                 .font(.system(size: 24))
                                 .foregroundColor(.white)
@@ -193,15 +185,24 @@ struct TimerView: View {
             .overlay(alignment: .top) {
                 ConfirmationDialog(
                     isPresented: $viewModel.shouldShowCloseDialog,
-                    onConfirm: {
-                        viewModel.confirmClose()
-                        onDismiss()
-                    },
-                    onCancel: {
-                        viewModel.cancelClose()
-                    }
+                    onConfirm: viewModel.confirmClose,
+                    onCancel: viewModel.cancelClose
                 )
                 .padding(.top, 270)
+            }
+            .fullScreenCover(isPresented: $viewModel.isStoryPresented) {
+                StoryView(
+                    card: viewModel.cardForStory,
+                    restartHistoryService: viewModel.restartHistoryServiceForStory,
+                    onDismiss: viewModel.dismissStory
+                )
+            }
+            .fullScreenCover(isPresented: $viewModel.isDatePickerPresented) {
+                DateView(
+                    initialDate: viewModel.initialDateForDatePicker,
+                    onConfirm: viewModel.applyNewStartDateAndDismissPicker,
+                    onDismiss: viewModel.dismissDatePicker
+                )
             }
         }
     }
@@ -217,5 +218,6 @@ struct TimerView: View {
         storageService: UserDefaultsStorageService(),
         userStatusProvider: DefaultUserStatusProvider()
     )
-    return TimerView(card: card, habitService: habitService, onDismiss: {})
+    let restartHistoryService = RestartHistoryService()
+    return TimerView(card: card, habitService: habitService, restartHistoryService: restartHistoryService, onDismiss: {})
 }

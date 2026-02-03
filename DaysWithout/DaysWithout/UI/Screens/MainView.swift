@@ -20,15 +20,18 @@ struct MainView: View {
     private let timerService: TimerServiceProtocol
     private let habitService: HabitServiceProtocol
     private let userStatusProvider: UserStatusProvider
+    private let restartHistoryService: RestartHistoryServiceProtocol
     
     init(
         habitService: HabitServiceProtocol,
         userStatusProvider: UserStatusProvider,
-        timerService: TimerServiceProtocol
+        timerService: TimerServiceProtocol,
+        restartHistoryService: RestartHistoryServiceProtocol
     ) {
         self.timerService = timerService
         self.habitService = habitService
         self.userStatusProvider = userStatusProvider
+        self.restartHistoryService = restartHistoryService
         _viewModel = StateObject(wrappedValue: MainViewModel(
             habitService: habitService,
             userStatusProvider: userStatusProvider
@@ -109,6 +112,7 @@ struct MainView: View {
                 TimerView(
                     card: card,
                     habitService: habitService,
+                    restartHistoryService: restartHistoryService,
                     onDismiss: { viewModel.dismissTimer() }
                 )
             }
@@ -198,11 +202,12 @@ struct MainView: View {
         userStatusProvider: DefaultUserStatusProvider()
     )
     let timerService = TimerService(habitService: habitService)
+    let restartHistoryService = RestartHistoryService()
     
-    return MainView(
+    MainView(
         habitService: habitService,
         userStatusProvider: DefaultUserStatusProvider(),
-        timerService: timerService
+        timerService: timerService, restartHistoryService: restartHistoryService
     )
 }
 
@@ -219,11 +224,12 @@ struct MainView: View {
         userStatusProvider: DefaultUserStatusProvider()
     )
     let timerService = TimerService(habitService: habitService)
+    let restartHistoryService = RestartHistoryService()
     
-    return MainView(
+    MainView(
         habitService: habitService,
         userStatusProvider: DefaultUserStatusProvider(),
-        timerService: timerService
+        timerService: timerService, restartHistoryService: restartHistoryService
     )
 }
 
@@ -250,11 +256,12 @@ struct MainView: View {
         userStatusProvider: DefaultUserStatusProvider()
     )
     let timerService = TimerService(habitService: habitService)
+    let restartHistoryService = RestartHistoryService()
     
-    return MainView(
+    MainView(
         habitService: habitService,
         userStatusProvider: DefaultUserStatusProvider(),
-        timerService: timerService
+        timerService: timerService, restartHistoryService: restartHistoryService
     )
 }
 
@@ -296,11 +303,12 @@ struct MainView: View {
         userStatusProvider: ProUserStatusProvider()
     )
     let timerService = TimerService(habitService: habitService)
+    let restartHistoryService = RestartHistoryService()
     
-    return MainView(
+    MainView(
         habitService: habitService,
-        userStatusProvider: ProUserStatusProvider(),
-        timerService: timerService
+        userStatusProvider: DefaultUserStatusProvider(),
+        timerService: timerService, restartHistoryService: restartHistoryService
     )
 }
 
@@ -337,10 +345,11 @@ struct MainView: View {
         userStatusProvider: ProUserStatusProvider()
     )
     let timerService = TimerService(habitService: habitService)
+    let restartHistoryService = RestartHistoryService()
     
-    return MainView(
+    MainView(
         habitService: habitService,
-        userStatusProvider: ProUserStatusProvider(),
-        timerService: timerService
+        userStatusProvider: DefaultUserStatusProvider(),
+        timerService: timerService, restartHistoryService: restartHistoryService
     )
 }

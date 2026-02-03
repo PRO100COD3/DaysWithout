@@ -16,6 +16,7 @@ struct DaysWithoutApp: App {
     private let habitService: HabitServiceProtocol
     private let userStatusProvider: UserStatusProvider
     private let timerService: TimerServiceProtocol
+    private let restartHistoryService: RestartHistoryServiceProtocol
     
     // MARK: - Initialization
     
@@ -32,6 +33,7 @@ struct DaysWithoutApp: App {
         self.habitService = habitService
         self.userStatusProvider = statusProvider
         self.timerService = TimerService(habitService: habitService)
+        self.restartHistoryService = RestartHistoryService()
     }
     
     // MARK: - Body
@@ -41,7 +43,8 @@ struct DaysWithoutApp: App {
             MainView(
                 habitService: habitService,
                 userStatusProvider: userStatusProvider,
-                timerService: timerService
+                timerService: timerService,
+                restartHistoryService: restartHistoryService
             )
         }
     }
