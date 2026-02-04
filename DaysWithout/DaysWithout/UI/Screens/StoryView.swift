@@ -21,92 +21,102 @@ struct StoryView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            headerView
-            if viewModel.isEmpty {
-                placeholderView
-            } else {
-                historyListView
+        ZStack{
+            LinearGradient(colors: [Theme.backgroundColor[0], Theme.backgroundColor[1]], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                headerView
+                if viewModel.isEmpty {
+                    placeholderView
+                } else {
+                    historyListView
+                }
+            }
+            .onAppear {
+                viewModel.loadHistory()
             }
         }
-        .background(Theme.backgroundColor[1].ignoresSafeArea())
-        .onAppear {
-            viewModel.loadHistory()
-        }
+        
     }
     
     private var headerView: some View {
         HStack {
             Button(action: onDismiss) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(Theme.mainHeadingColor)
             }
-            .frame(width: 44, height: 44)
+            .frame(width: 24, height: 24)
             Spacer()
             Text(viewModel.cardTitle)
-                .font(.custom(Theme.headingFontName, size: Theme.mainHeadingFontSize))
+                .font(.custom("Onest", size: 20))
                 .fontWeight(.bold)
-                .foregroundColor(Theme.mainHeadingColor)
+                .foregroundColor(.black)
             Spacer()
-            Color.clear
-                .frame(width: 44, height: 44)
+            Button(action: onDismiss) {
+                Image("coins")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Theme.mainHeadingColor)
+            }
+            .frame(width: 36, height: 36)
         }
-        .padding(.horizontal, Theme.screenPadding)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
-        .background(Color.white)
-        .overlay(alignment: .bottom) {
-            Divider()
-                .background(Theme.DeviderColor)
-        }
+        .padding(.horizontal, 16)
+        .padding(.top, 7)
     }
     
     private var placeholderView: some View {
         VStack(spacing: 0) {
-            Spacer()
             Text("После нажатия рестарта у вас отобразится история")
-                .font(.custom(Theme.headingFontName, size: Theme.emptyStateDescriptionFontSize))
-                .foregroundColor(Theme.mainDescriptionColor)
+                .font(.custom("Onest", size: 18))
+                .fontWeight(.regular)
+                .foregroundColor(Theme.mainHeadingColor)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, Theme.screenPadding * 2)
             Spacer()
         }
+        .padding(.top, 37)
     }
     
     private var historyListView: some View {
         ScrollView {
-            LazyVStack(spacing: 12) {
+            LazyVStack(spacing: 16) {
                 ForEach(viewModel.history) { record in
                     historyCell(record: record)
                 }
             }
-            .padding(.horizontal, Theme.screenPadding)
-            .padding(.top, 20)
-            .padding(.bottom, 24)
+            .padding(.horizontal, 23)
+            .padding(.top, 44)
         }
     }
     
     private func historyCell(record: RestartRecord) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 14) {
             Text(StoryViewModel.daysText(for: record.days))
-                .font(.custom(Theme.headingFontName, size: Theme.cardDaysCountFontSize))
-                .fontWeight(.medium)
-                .foregroundColor(Theme.cardColor(for: card.colorID).top)
+                .font(.custom("Onest", size: 18))
+                .fontWeight(.semibold)
+                .foregroundColor(Color(red: 72/255, green: 153/255, blue: 39/255))
             if !record.reason.isEmpty {
                 Text(record.reason)
-                    .font(.custom(Theme.cardFontName, size: Theme.cardSmallTextFontSize))
-                    .foregroundColor(Theme.mainDescriptionColor)
+                    .font(.custom("Onest", size: 18))
+                    .fontWeight(.medium)
+                    .foregroundColor(Color(red: 154/255, green: 154/255, blue: 154/255))
             }
             Text(StoryViewModel.formatDateRange(periodStart: record.periodStart, periodEnd: record.periodEnd))
-                .font(.custom(Theme.cardFontName, size: Theme.cardSmallTextFontSize))
-                .foregroundColor(Theme.mainDescriptionColor)
+                .font(.custom("Onest", size: 16))
+                .fontWeight(.regular)
+                .foregroundColor(Color(red: 85/255, green: 85/255, blue: 85/255))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cardCornerRadius))
-        .shadow(color: Theme.cardShadowColor, radius: Theme.cardShadowRadius, x: Theme.cardShadowX, y: Theme.cardShadowY)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 24)
+        .background(Color.white.opacity(0.95))
+        .overlay(RoundedRectangle(cornerRadius: 24)
+            .stroke(
+                Color.black.opacity(0.08),
+                lineWidth: 1
+            ))
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.06), radius: 36, x: 0, y: 8)
     }
 }
 
@@ -121,6 +131,11 @@ struct StoryView: View {
     let service = RestartHistoryService()
     let start = Calendar.current.date(byAdding: .day, value: -5, to: Date()) ?? Date()
     let end = Date()
+    service.addRecord(cardId: card.id, record: RestartRecord(days: 5, reason: "Текст причины", periodStart: start, periodEnd: end))
+    service.addRecord(cardId: card.id, record: RestartRecord(days: 5, reason: "Текст причины", periodStart: start, periodEnd: end))
+    service.addRecord(cardId: card.id, record: RestartRecord(days: 5, reason: "Текст причины", periodStart: start, periodEnd: end))
+    service.addRecord(cardId: card.id, record: RestartRecord(days: 5, reason: "Текст причины", periodStart: start, periodEnd: end))
+    service.addRecord(cardId: card.id, record: RestartRecord(days: 5, reason: "Текст причины", periodStart: start, periodEnd: end))
     service.addRecord(cardId: card.id, record: RestartRecord(days: 5, reason: "Текст причины", periodStart: start, periodEnd: end))
     return StoryView(card: card, restartHistoryService: service, onDismiss: {})
 }

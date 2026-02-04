@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// Экран поочерёдного выбора даты (календарь) и времени (циферблат), затем сохранение новой даты начала.
 struct DateView: View {
@@ -21,14 +22,19 @@ struct DateView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            headerView
-            contentView
-        }
-        .background(Theme.backgroundColor[1].ignoresSafeArea())
-        .onAppear {
-            viewModel.onConfirm = { [onConfirm] date in
-                onConfirm(date)
+        ZStack{
+            LinearGradient(colors: [Theme.backgroundColor[0], Theme.backgroundColor[1]], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                headerView
+                contentView
+                    .padding(.top, 96)
+                Spacer()
+            }
+            .onAppear {
+                viewModel.onConfirm = { [onConfirm] date in
+                    onConfirm(date)
+                }
             }
         }
     }
@@ -43,27 +49,20 @@ struct DateView: View {
                 }
             }) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(Theme.mainHeadingColor)
             }
-            .frame(width: 44, height: 44)
+            .frame(width: 24, height: 24)
             Spacer()
             Text(viewModel.title)
-                .font(.custom(Theme.headingFontName, size: Theme.mainHeadingFontSize))
+                .font(.custom("Onest", size: 20))
                 .fontWeight(.bold)
                 .foregroundColor(Theme.mainHeadingColor)
             Spacer()
             Color.clear
-                .frame(width: 44, height: 44)
+                .frame(width: 34, height: 36)
         }
-        .padding(.horizontal, Theme.screenPadding)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
-        .background(Color.white)
-        .overlay(alignment: .bottom) {
-            Divider()
-                .background(Theme.DeviderColor)
-        }
+        .padding(.horizontal, 16)
     }
     
     @ViewBuilder
@@ -78,51 +77,57 @@ struct DateView: View {
     
     private var calendarCard: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 16) {
+            VStack(spacing: 13) {
                 HStack {
                     Button(action: viewModel.previousMonth) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Theme.addButtonColor)
+                            .foregroundColor(Color(red: 72/255, green: 153/255, blue: 79/255))
+                            .padding(6)
                     }
                     Spacer()
                     Text(viewModel.monthYearTitle)
-                        .font(.custom(Theme.headingFontName, size: 17))
-                        .fontWeight(.medium)
+                        .font(.custom("Onest", size: 20))
+                        .fontWeight(.semibold)
                         .foregroundColor(Theme.mainHeadingColor)
                     Spacer()
                     Button(action: viewModel.nextMonth) {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Theme.addButtonColor)
+                            .foregroundColor(Color(red: 72/255, green: 153/255, blue: 79/255))
+                            .padding(6)
                     }
                 }
-                .padding(.horizontal, 4)
+//                .padding(.horizontal, 4)
                 
                 HStack(spacing: 0) {
                     ForEach(Array(viewModel.weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
                         Text(symbol)
-                            .font(.custom(Theme.cardFontName, size: 12))
-                            .foregroundColor(Theme.mainDescriptionColor)
+                            .font(.custom("Onest", size: 14))
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.3))
                             .frame(maxWidth: .infinity)
                     }
                 }
                 
                 let days = viewModel.daysInMonth()
                 let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 7)
-                LazyVGrid(columns: columns, spacing: 8) {
+                LazyVGrid(columns: columns, spacing: 7) {
                     ForEach(Array(days.enumerated()), id: \.offset) { _, day in
                         if let date = day {
                             let selected = viewModel.isSelectedDay(date)
+                            let isToday = viewModel.isToday(date)
                             let inMonth = viewModel.isCurrentMonth(date)
+                            let dayColor = Color(red: 72/255, green: 153/255, blue: 79/255)
                             Button(action: { viewModel.selectDay(date) }) {
                                 Text("\(Calendar.current.component(.day, from: date))")
-                                    .font(.custom(Theme.headingFontName, size: 16))
-                                    .foregroundColor(selected ? .white : (inMonth ? Theme.mainHeadingColor : Theme.mainDescriptionColor))
-                                    .frame(width: 36, height: 36)
+                                    .font(.custom("Onest", size: 18))
+                                    .fontWeight(.regular)
+                                    .foregroundColor((selected || isToday) ? dayColor : (inMonth ? Theme.mainHeadingColor : Theme.mainDescriptionColor))
+                                    .frame(width: 44, height: 44)
                                     .background(
                                         Circle()
-                                            .fill(selected ? Theme.addButtonColor : Color.clear)
+                                            .fill(selected ? Color(red: 217/255, green: 248/255, blue: 201/255) : Color.clear)
                                     )
                             }
                             .buttonStyle(.plain)
@@ -133,72 +138,162 @@ struct DateView: View {
                     }
                 }
             }
-            .padding(20)
             createButton
         }
-        .padding(Theme.screenPadding)
+        .padding(.top, 24)
+        .padding(.horizontal, 20)
         .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cardCornerRadius))
-        .shadow(color: Theme.cardShadowColor, radius: Theme.cardShadowRadius, x: Theme.cardShadowX, y: Theme.cardShadowY)
-        .padding(.horizontal, Theme.screenPadding)
-        .padding(.top, 20)
+        .overlay(RoundedRectangle(cornerRadius: 25)
+            .stroke(
+                Color.black.opacity(0.08),
+                lineWidth: 1
+            ))
+        .clipShape(RoundedRectangle(cornerRadius: 25))
+        .shadow(color: Color.black.opacity(0.12), radius: 25, x: 0, y: 10)
+        .padding(.horizontal, 23)
     }
+    
+    private static let timeWheelRowHeight: CGFloat = 28
+    private static let timeWheelVisibleHeight: CGFloat = 140
     
     private var timeCard: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 24) {
-                timeWheel(title: "Часы", range: 0..<24, value: Binding(
-                    get: { viewModel.selectedHour },
-                    set: { viewModel.selectedHour = $0 }
-                ))
-                timeWheel(title: "Минуты", range: 0..<60, value: Binding(
-                    get: { viewModel.selectedMinute },
-                    set: { viewModel.selectedMinute = $0 }
-                ))
+            HStack(spacing: 27) {
+                TimeWheelRepresentable(
+                    range: 0..<24,
+                    selection: Binding(
+                        get: { viewModel.selectedHour },
+                        set: { viewModel.selectedHour = $0 }
+                    )
+                )
+                .frame(width: 100)
+
+                TimeWheelRepresentable(
+                    range: 0..<60,
+                    selection: Binding(
+                        get: { viewModel.selectedMinute },
+                        set: { viewModel.selectedMinute = $0 }
+                    )
+                )
+                .frame(width: 100)
             }
-            .padding(.vertical, 24)
+            .frame(height: Self.timeWheelVisibleHeight)
+//            .frame(maxWidth: .infinity)
+            
+//            .padding(.leading, view.frame.width / 2 - 12)
+//            .padding(.vertical, 24)
+//            .padding(.horizontal, 200)
+            
             createButton
         }
-        .padding(Theme.screenPadding)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cardCornerRadius))
-        .shadow(color: Theme.cardShadowColor, radius: Theme.cardShadowRadius, x: Theme.cardShadowX, y: Theme.cardShadowY)
-        .padding(.horizontal, Theme.screenPadding)
-        .padding(.top, 20)
+        .overlay(timeWheelLinesOverlay)
+        .frame(width: 350)
+//        .padding(.top, 24)
+//        .padding(.horizontal, 20)
+        .background(Color.white.opacity(0.85))
+        .clipShape(RoundedRectangle(cornerRadius: 25))
+        .overlay(RoundedRectangle(cornerRadius: 25)
+            .stroke(
+                Color.black.opacity(0.08),
+                lineWidth: 1
+            ))
+        .shadow(color: Color.black.opacity(0.12), radius: 25, x: 0, y: 10)
     }
     
-    private func timeWheel(title: String, range: Range<Int>, value: Binding<Int>) -> some View {
-        VStack(spacing: 8) {
-            Text(title)
-                .font(.custom(Theme.cardFontName, size: Theme.cardSmallTextFontSize))
-                .foregroundColor(Theme.mainDescriptionColor)
-            Picker("", selection: value) {
-                ForEach(range, id: \.self) { n in
-                    Text("\(n)")
-                        .tag(n)
-                }
-            }
-            .pickerStyle(.wheel)
-            .labelsHidden()
+    private var timeWheelLinesOverlay: some View {
+        let rowHeight = Self.timeWheelRowHeight
+        let totalHeight = Self.timeWheelVisibleHeight
+        let topInset = (totalHeight - rowHeight) / 2
+        let lineColor = Color.black.opacity(0.15)
+        return VStack(spacing: 0) {
+            Spacer()
+                .frame(height: topInset)
+            Rectangle()
+                .fill(lineColor)
+                .frame(height: 1)
+            Spacer()
+                .frame(height: rowHeight)
+            Rectangle()
+                .fill(lineColor)
+                .frame(height: 1)
+            Spacer()
         }
-        .frame(maxWidth: .infinity)
+        .allowsHitTesting(false)
     }
     
     private var createButton: some View {
         Button(action: viewModel.confirmCurrentStep) {
             Text("СОЗДАТЬ")
-                .font(.custom(Theme.headingFontName, size: 16))
+                .font(.custom("Onest", size: 14))
                 .fontWeight(.medium)
-                .foregroundColor(.white)
+                .foregroundColor(Color(red: 72/255, green: 153/255, blue: 79/255))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Theme.addButtonColor)
+                .background(Color(red: 217/255, green: 248/255, blue: 201/255))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .padding(.top, 20)
-        .padding(.horizontal, 20)
-        .padding(.bottom, 20)
+        .padding(.top, 24)
+        .padding(.bottom, 24)
         .pressAnimation()
+    }
+}
+
+// MARK: - Time Wheel (UIPickerView без серого фона, с уменьшенным межстрочным интервалом)
+private struct TimeWheelRepresentable: UIViewRepresentable {
+    let range: Range<Int>
+    @Binding var selection: Int
+    
+    func makeUIView(context: Context) -> UIPickerView {
+        let picker = UIPickerView()
+        picker.delegate = context.coordinator
+        picker.dataSource = context.coordinator
+        picker.translatesAutoresizingMaskIntoConstraints = false
+        let row = selection - range.lowerBound
+        if row >= 0, row < range.count {
+            picker.selectRow(row, inComponent: 0, animated: false)
+        }
+
+        return picker
+    }
+    
+    func updateUIView(_ picker: UIPickerView, context: Context) {
+        context.coordinator.range = range
+        context.coordinator.selection = $selection
+        let row = selection - range.lowerBound
+        if row >= 0, row < range.count, picker.selectedRow(inComponent: 0) != row {
+            picker.selectRow(row, inComponent: 0, animated: false)
+        }
+        if picker.subviews.count > 1 {
+            picker.subviews[1].backgroundColor = .clear
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(selection: $selection, range: range)
+    }
+    
+    class Coordinator: NSObject, UIPickerViewDelegate, UIPickerViewDataSource {
+        var selection: Binding<Int>
+        var range: Range<Int>
+        
+        init(selection: Binding<Int>, range: Range<Int>) {
+            self.selection = selection
+            self.range = range
+        }
+        
+        func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
+        
+        func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+            range.count
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+            "\(range.lowerBound + row)"
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+            selection.wrappedValue = range.lowerBound + row
+        }
     }
 }
 

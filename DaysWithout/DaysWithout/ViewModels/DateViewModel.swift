@@ -47,13 +47,15 @@ final class DateViewModel: ObservableObject {
         return formatter.string(from: calendarMonth).capitalized
     }
     
+    /// Дни недели: ПН, ВТ, СР, ЧТ, ПТ, СБ, ВС (понедельник первым)
     var weekdaySymbols: [String] {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
         formatter.dateFormat = "EEEEE"
         var symbols: [String] = []
-        for i in 2...8 {
-            guard let day = calendar.date(bySetting: .weekday, value: i, of: Date()) else { continue }
+        let weekdaysOrder = [2, 3, 4, 5, 6, 7, 1]
+        for weekday in weekdaysOrder {
+            guard let day = calendar.date(bySetting: .weekday, value: weekday, of: Date()) else { continue }
             symbols.append(formatter.string(from: day).uppercased())
         }
         return symbols
@@ -83,6 +85,11 @@ final class DateViewModel: ObservableObject {
     func isCurrentMonth(_ date: Date?) -> Bool {
         guard let date = date else { return false }
         return calendar.isDate(date, equalTo: calendarMonth, toGranularity: .month)
+    }
+    
+    func isToday(_ date: Date?) -> Bool {
+        guard let date = date else { return false }
+        return calendar.isDateInToday(date)
     }
     
     func selectDay(_ date: Date) {
@@ -132,7 +139,9 @@ final class DateViewModel: ObservableObject {
     var selectedHour: Int {
         get { calendar.component(.hour, from: selectedDate) }
         set {
-            if let date = calendar.date(bySetting: .hour, value: newValue, of: selectedDate) {
+            var comps = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: selectedDate)
+            comps.hour = newValue
+            if let date = calendar.date(from: comps) {
                 selectedDate = date
             }
         }
@@ -141,7 +150,9 @@ final class DateViewModel: ObservableObject {
     var selectedMinute: Int {
         get { calendar.component(.minute, from: selectedDate) }
         set {
-            if let date = calendar.date(bySetting: .minute, value: newValue, of: selectedDate) {
+            var comps = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: selectedDate)
+            comps.minute = newValue
+            if let date = calendar.date(from: comps) {
                 selectedDate = date
             }
         }
