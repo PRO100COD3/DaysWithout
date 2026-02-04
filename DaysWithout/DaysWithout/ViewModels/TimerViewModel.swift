@@ -62,7 +62,22 @@ final class TimerViewModel: ObservableObject {
         self.timerTextKey = "\(prefix)_Text"
         self.text = card.title
         loadTimerState()
+        startDisplayTimer()
         setupNotifications()
+    }
+    
+    /// Запускает таймер обновления экрана раз в секунду (время и прогресс).
+    private func startDisplayTimer() {
+        timer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            Task { @MainActor in
+                self.updateElapsedTime()
+                if self.isRunning, self.elapsedSeconds >= self.targetSeconds {
+                    self.completeCycle()
+                }
+            }
+        }
+        RunLoop.main.add(timer!, forMode: .common)
     }
     
     var progress: Double {
@@ -76,10 +91,6 @@ final class TimerViewModel: ObservableObject {
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
     
-    var shouldShowRestart: Bool {
-        hasStarted
-    }
-    
     /// Карточка и сервис истории для экрана Story (доступ только для отображения).
     var cardForStory: HabitCard { card }
     var restartHistoryServiceForStory: RestartHistoryServiceProtocol { restartHistoryService }
@@ -87,13 +98,9 @@ final class TimerViewModel: ObservableObject {
     /// Начальная дата для экрана выбора даты (текущая дата начала отсчёта).
     var initialDateForDatePicker: Date { startDate ?? card.startDate }
     
-    /// Обработка нажатия главной кнопки (СТАРТ или РЕСТАРТ).
+    /// Обработка нажатия кнопки РЕСТАРТ (таймер всегда запущен при создании).
     func handleMainButtonTap() {
-        if shouldShowRestart {
-            showRestartDialog()
-        } else {
-            startTimer()
-        }
+        showRestartDialog()
     }
     
     func presentStory() {
@@ -156,13 +163,6 @@ final class TimerViewModel: ObservableObject {
         }
         
         saveTimerState()
-        
-        timer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            Task { @MainActor in
-                await self.tick()
-            }
-        }
     }
     
     func showRestartDialog() {
@@ -210,8 +210,6 @@ final class TimerViewModel: ObservableObject {
     }
     
     func stopTimer() {
-        timer?.invalidate()
-        timer = nil
         isRunning = false
         startDate = nil
         clearTimerState()
@@ -292,14 +290,6 @@ final class TimerViewModel: ObservableObject {
     private func applicationWillEnterForeground() async {
         if isRunning {
             updateElapsedTime()
-            if timer == nil {
-                timer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-                    guard let self = self else { return }
-                    Task { @MainActor in
-                        await self.tick()
-                    }
-                }
-            }
         }
     }
     
@@ -326,23 +316,17 @@ final class TimerViewModel: ObservableObject {
             }
             
             updateElapsedTime()
-            if wasRunning {
-                // Таймер был запущен — сразу возобновляем
-                timer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-                    guard let self = self else { return }
-                    Task { @MainActor in
-                        await self.tick()
-                    }
-                }
-            }
         } else {
-            // Инициализация из карточки: дни и время в текущем 24h-периоде
+            // Первый запуск: таймер считается запущенным с даты карточки
+            hasStarted = true
+            isRunning = true
             days = card.daysCount
             startDate = card.startDate
             savedDays = card.daysCount
             savedElapsedSeconds = 0
             let totalElapsed = Date().timeIntervalSince(card.startDate)
             elapsedSeconds = totalElapsed.truncatingRemainder(dividingBy: targetSeconds)
+            saveTimerState()
         }
     }
     

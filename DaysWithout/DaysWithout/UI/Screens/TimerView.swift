@@ -75,7 +75,7 @@ struct TimerView: View {
                     .padding(.top, 53)
                     
                     Button(action: viewModel.handleMainButtonTap) {
-                        Text(viewModel.shouldShowRestart ? "РЕСТАРТ" : "СТАРТ")
+                        Text("РЕСТАРТ")
                             .font(.custom("Onest", size: 20))
                             .fontWeight(.regular)
                             .foregroundColor(.white)

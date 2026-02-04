@@ -27,8 +27,9 @@ struct DateView: View {
                 .ignoresSafeArea()
             VStack(spacing: 0) {
                 headerView
+                Spacer()
                 contentView
-                    .padding(.top, 96)
+                    .padding(.horizontal, 23)
                 Spacer()
             }
             .onAppear {
@@ -98,7 +99,6 @@ struct DateView: View {
                             .padding(6)
                     }
                 }
-//                .padding(.horizontal, 4)
                 
                 HStack(spacing: 0) {
                     ForEach(Array(viewModel.weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
@@ -139,10 +139,11 @@ struct DateView: View {
                 }
             }
             createButton
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
         }
         .padding(.top, 24)
         .padding(.horizontal, 20)
-        .background(Color.white)
+        .background(Color.white.opacity(0.85))
         .overlay(RoundedRectangle(cornerRadius: 25)
             .stroke(
                 Color.black.opacity(0.08),
@@ -150,46 +151,31 @@ struct DateView: View {
             ))
         .clipShape(RoundedRectangle(cornerRadius: 25))
         .shadow(color: Color.black.opacity(0.12), radius: 25, x: 0, y: 10)
-        .padding(.horizontal, 23)
     }
     
-    private static let timeWheelRowHeight: CGFloat = 28
-    private static let timeWheelVisibleHeight: CGFloat = 140
+    private static let timeWheelRowHeight: CGFloat = 34
+    private static let timeWheelVisibleHeight: CGFloat = 200
     
     private var timeCard: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 27) {
-                TimeWheelRepresentable(
-                    range: 0..<24,
-                    selection: Binding(
-                        get: { viewModel.selectedHour },
-                        set: { viewModel.selectedHour = $0 }
-                    )
+            TimePickerRepresentable(
+                hourSelection: Binding(
+                    get: { viewModel.selectedHour },
+                    set: { viewModel.selectedHour = $0 }
+                ),
+                minuteSelection: Binding(
+                    get: { viewModel.selectedMinute },
+                    set: { viewModel.selectedMinute = $0 }
                 )
-                .frame(width: 100)
-
-                TimeWheelRepresentable(
-                    range: 0..<60,
-                    selection: Binding(
-                        get: { viewModel.selectedMinute },
-                        set: { viewModel.selectedMinute = $0 }
-                    )
-                )
-                .frame(width: 100)
-            }
+            )
+            .padding(.top, 24)
             .frame(height: Self.timeWheelVisibleHeight)
-//            .frame(maxWidth: .infinity)
-            
-//            .padding(.leading, view.frame.width / 2 - 12)
-//            .padding(.vertical, 24)
-//            .padding(.horizontal, 200)
-            
             createButton
+                .padding(.top, 16)
+                .padding(.horizontal, 20)
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
         }
         .overlay(timeWheelLinesOverlay)
-        .frame(width: 350)
-//        .padding(.top, 24)
-//        .padding(.horizontal, 20)
         .background(Color.white.opacity(0.85))
         .clipShape(RoundedRectangle(cornerRadius: 25))
         .overlay(RoundedRectangle(cornerRadius: 25)
@@ -202,9 +188,9 @@ struct DateView: View {
     
     private var timeWheelLinesOverlay: some View {
         let rowHeight = Self.timeWheelRowHeight
-        let totalHeight = Self.timeWheelVisibleHeight
+        let totalHeight = Self.timeWheelVisibleHeight + 24
         let topInset = (totalHeight - rowHeight) / 2
-        let lineColor = Color.black.opacity(0.15)
+        let lineColor = Color.black.opacity(0.12)
         return VStack(spacing: 0) {
             Spacer()
                 .frame(height: topInset)
@@ -238,61 +224,76 @@ struct DateView: View {
     }
 }
 
-// MARK: - Time Wheel (UIPickerView без серого фона, с уменьшенным межстрочным интервалом)
-private struct TimeWheelRepresentable: UIViewRepresentable {
-    let range: Range<Int>
-    @Binding var selection: Int
+// MARK: - Пикер времени: один UIPickerView с двумя компонентами (часы и минуты)
+private struct TimePickerRepresentable: UIViewRepresentable {
+    @Binding var hourSelection: Int
+    @Binding var minuteSelection: Int
     
     func makeUIView(context: Context) -> UIPickerView {
         let picker = UIPickerView()
         picker.delegate = context.coordinator
         picker.dataSource = context.coordinator
-        picker.translatesAutoresizingMaskIntoConstraints = false
-        let row = selection - range.lowerBound
-        if row >= 0, row < range.count {
-            picker.selectRow(row, inComponent: 0, animated: false)
-        }
-
+        picker.selectRow(hourSelection, inComponent: 0, animated: false)
+        picker.selectRow(minuteSelection, inComponent: 1, animated: false)
         return picker
     }
     
     func updateUIView(_ picker: UIPickerView, context: Context) {
-        context.coordinator.range = range
-        context.coordinator.selection = $selection
-        let row = selection - range.lowerBound
-        if row >= 0, row < range.count, picker.selectedRow(inComponent: 0) != row {
-            picker.selectRow(row, inComponent: 0, animated: false)
+        context.coordinator.hourSelection = $hourSelection
+        context.coordinator.minuteSelection = $minuteSelection
+        
+        if picker.selectedRow(inComponent: 0) != hourSelection {
+            picker.selectRow(hourSelection, inComponent: 0, animated: false)
         }
+        if picker.selectedRow(inComponent: 1) != minuteSelection {
+            picker.selectRow(minuteSelection, inComponent: 1, animated: false)
+        }
+        
+        // Убираем серый фон у выбранной строки
         if picker.subviews.count > 1 {
             picker.subviews[1].backgroundColor = .clear
         }
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator(selection: $selection, range: range)
+        Coordinator(hourSelection: $hourSelection, minuteSelection: $minuteSelection)
     }
     
     class Coordinator: NSObject, UIPickerViewDelegate, UIPickerViewDataSource {
-        var selection: Binding<Int>
-        var range: Range<Int>
+        var hourSelection: Binding<Int>
+        var minuteSelection: Binding<Int>
         
-        init(selection: Binding<Int>, range: Range<Int>) {
-            self.selection = selection
-            self.range = range
+        init(hourSelection: Binding<Int>, minuteSelection: Binding<Int>) {
+            self.hourSelection = hourSelection
+            self.minuteSelection = minuteSelection
         }
         
-        func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
+        func numberOfComponents(in pickerView: UIPickerView) -> Int {
+            2
+        }
         
         func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-            range.count
+            component == 0 ? 24 : 60
         }
         
         func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-            "\(range.lowerBound + row)"
+            "\(row)"
         }
         
         func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-            selection.wrappedValue = range.lowerBound + row
+            if component == 0 {
+                hourSelection.wrappedValue = row
+            } else {
+                minuteSelection.wrappedValue = row
+            }
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+            34
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
+            50
         }
     }
 }
