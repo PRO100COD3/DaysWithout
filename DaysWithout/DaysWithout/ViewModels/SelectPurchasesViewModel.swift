@@ -56,18 +56,27 @@ final class SelectPurchasesViewModel: ObservableObject {
     /// Выбрать опцию по индексу
     func selectOption(at index: Int) {
         guard options.indices.contains(index) else { return }
-        selectedIndex = index
+        Task { @MainActor in
+            await Task.yield()
+            selectedIndex = index
+        }
     }
     
     /// Оформить подписку (выбранная опция). Показывает экран успеха.
     func subscribe() {
         _ = selectedOption
         // TODO: интеграция с StoreKit / сервисом покупок
-        isSuccessPresented = true
+        Task { @MainActor in
+            await Task.yield()
+            isSuccessPresented = true
+        }
     }
     
     /// Закрыть только экраны подписки, Story остаётся (крестик или «СПАСИБО» на Success, крестик на SelectPurchases)
     func closeAll() {
-        onCloseAll()
+        Task { @MainActor in
+            await Task.yield()
+            onCloseAll()
+        }
     }
 }

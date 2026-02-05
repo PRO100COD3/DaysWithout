@@ -24,7 +24,7 @@ struct CharacterLimitAlertView: View {
                 Text(message)
                     .font(.custom(Theme.headingFontName, size: Theme.characterLimitAlertFontSize))
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(Theme.characterLimitAlertTextColor)
                     .multilineTextAlignment(.center)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity)
@@ -56,5 +56,5 @@ struct CharacterLimitAlertView: View {
         CharacterLimitAlertView(message: "Максимальное кол-во символов - 17", isPresented: .constant(true))
         Spacer()
     }
-    .background(Color.gray.opacity(0.1))
+    .background(Color.gray.opacity(Theme.previewOverlayLightOpacity))
 }

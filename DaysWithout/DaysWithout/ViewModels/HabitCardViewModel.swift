@@ -67,7 +67,10 @@ final class HabitCardViewModel: ObservableObject {
     func triggerPress(duration: TimeInterval) {
         isPressed = true
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
-            self?.isPressed = false
+            Task { @MainActor in
+                await Task.yield()
+                self?.isPressed = false
+            }
         }
     }
     
@@ -82,6 +85,7 @@ final class HabitCardViewModel: ObservableObject {
         updateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor [weak self] in
+                await Task.yield()
                 self?.updateValues()
             }
         }

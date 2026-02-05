@@ -22,8 +22,8 @@ private struct PressAnimationModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .scaleEffect(isPressed ? 0.95 : 1.0)
-            .opacity(isPressed ? 0.9 : 1.0)
+            .scaleEffect(isPressed ? Theme.pressModifierScale : 1.0)
+            .opacity(isPressed ? Theme.pressModifierOpacity : 1.0)
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in

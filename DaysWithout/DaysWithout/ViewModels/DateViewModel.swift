@@ -26,12 +26,32 @@ final class DateViewModel: ObservableObject {
     
     /// Замыкание при подтверждении: передаётся итоговая дата
     private let onConfirm: (Date) -> Void
+    /// Закрыть экран без подтверждения (кнопка «назад» на шаге даты)
+    private let onDismiss: () -> Void
     
-    init(initialDate: Date = Date(), onConfirm: @escaping (Date) -> Void) {
+    init(initialDate: Date = Date(), onConfirm: @escaping (Date) -> Void, onDismiss: @escaping () -> Void) {
         self.initialDate = initialDate
         self.onConfirm = onConfirm
+        self.onDismiss = onDismiss
         self.selectedDate = initialDate
         self.calendarMonth = calendar.startOfMonth(for: initialDate)
+    }
+    
+    /// Обработка нажатия «назад»: переход на шаг даты или закрытие экрана
+    func handleBackButtonTap() {
+        Task { @MainActor in
+            await Task.yield()
+            if canGoBack {
+                goBack()
+            } else {
+                onDismiss()
+            }
+        }
+    }
+    
+    /// Номер дня для отображения в ячейке календаря
+    func dayNumber(for date: Date) -> Int {
+        calendar.component(.day, from: date)
     }
     
     var title: String {
@@ -94,46 +114,61 @@ final class DateViewModel: ObservableObject {
     }
     
     func selectDay(_ date: Date) {
-        let components = calendar.dateComponents([.year, .month, .day], from: date)
-        let time = calendar.dateComponents([.hour, .minute], from: selectedDate)
-        var merged = DateComponents()
-        merged.year = components.year
-        merged.month = components.month
-        merged.day = components.day
-        merged.hour = time.hour
-        merged.minute = time.minute
-        if let newDate = calendar.date(from: merged) {
-            selectedDate = newDate
+        Task { @MainActor in
+            await Task.yield()
+            let components = calendar.dateComponents([.year, .month, .day], from: date)
+            let time = calendar.dateComponents([.hour, .minute], from: selectedDate)
+            var merged = DateComponents()
+            merged.year = components.year
+            merged.month = components.month
+            merged.day = components.day
+            merged.hour = time.hour
+            merged.minute = time.minute
+            if let newDate = calendar.date(from: merged) {
+                selectedDate = newDate
+            }
         }
     }
     
     func previousMonth() {
-        if let newMonth = calendar.date(byAdding: .month, value: -1, to: calendarMonth) {
-            calendarMonth = calendar.startOfMonth(for: newMonth)
+        Task { @MainActor in
+            await Task.yield()
+            if let newMonth = calendar.date(byAdding: .month, value: -1, to: calendarMonth) {
+                calendarMonth = calendar.startOfMonth(for: newMonth)
+            }
         }
     }
     
     func nextMonth() {
-        if let newMonth = calendar.date(byAdding: .month, value: 1, to: calendarMonth) {
-            calendarMonth = calendar.startOfMonth(for: newMonth)
+        Task { @MainActor in
+            await Task.yield()
+            if let newMonth = calendar.date(byAdding: .month, value: 1, to: calendarMonth) {
+                calendarMonth = calendar.startOfMonth(for: newMonth)
+            }
         }
     }
     
     func confirmCurrentStep() {
-        switch step {
-        case .date:
-            step = .time
-        case .time:
-            onConfirm(selectedDate)
+        Task { @MainActor in
+            await Task.yield()
+            switch step {
+            case .date:
+                step = .time
+            case .time:
+                onConfirm(selectedDate)
+            }
         }
     }
     
     func goBack() {
-        switch step {
-        case .date:
-            break
-        case .time:
-            step = .date
+        Task { @MainActor in
+            await Task.yield()
+            switch step {
+            case .date:
+                break
+            case .time:
+                step = .date
+            }
         }
     }
     

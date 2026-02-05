@@ -44,62 +44,26 @@ struct MainView: View {
         ZStack {
             LinearGradient(colors: [Theme.backgroundColor[0], Theme.backgroundColor[1]], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Заголовок
-                headerView
-                
-                // Контент
+
+            VStack(spacing: Theme.mainContentStackSpacing) {
+                MainHeaderView()
                 contentView
-                
                 Spacer()
             }
             .ignoresSafeArea(edges: .bottom)
-            // Кнопка "Добавить" (отображается только если не достигнут лимит статуса пользователя)
+
             if viewModel.shouldShowAddButton {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        AddHabitButtonView(onTap: {
-                            viewModel.presentAddHabit()
-                        })
-                        .padding(.trailing, Theme.buttonPadding)
-                        .padding(.bottom, Theme.buttonPadding)
-                    }
-                }
-                .ignoresSafeArea(edges: .bottom)
+                MainFloatingAddButtonView(onTap: viewModel.presentAddHabit)
             }
         }
         .blur(radius: viewModel.isAddHabitPresented ? Theme.addHabitBackdropBlurRadius : 0)
         .overlay {
             if viewModel.isAddHabitPresented {
-                // Задний фон: затемнение rgba(0, 0, 0, 0.3)
-                ZStack {
-                    Color.black.opacity(0.3)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            viewModel.dismissAddHabit()
-                        }
-                    
-                    // Модальное окно по центру
-                    VStack {
-                        Spacer()
-                        
-                        AddHabitView(
-                            habitService: habitService,
-                            userStatusProvider: userStatusProvider,
-                            onDismiss: {
-                                viewModel.dismissAddHabit()
-                            }
-                        )
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, Theme.addHabitModalHorizontalMargin)
-                        
-                        Spacer()
-                    }
-                }
-                .zIndex(1000)
+                MainAddHabitOverlayView(
+                    habitService: habitService,
+                    userStatusProvider: userStatusProvider,
+                    onDismiss: viewModel.dismissAddHabit
+                )
             }
         }
         .fullScreenCover(
@@ -119,78 +83,22 @@ struct MainView: View {
         }
     }
     
-    // MARK: - Header
-    
-    private var headerView: some View {
-        VStack(spacing: 0) {
-            Text("Привычки")
-                .font(.custom(Theme.headingFontName, size: Theme.mainHeadingFontSize))
-                .fontWeight(.bold)
-                .foregroundColor(Theme.mainHeadingColor)
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, Theme.headerTopPadding)
-                .padding(.bottom, Theme.headerBottomPadding)
-            
-            Divider()
-                .background(Theme.DeviderColor)
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.bottom, Theme.dividerBottomPadding)
-        }
-    }
-    
     // MARK: - Content
-    
+
     private var contentView: some View {
         Group {
             if viewModel.cards.isEmpty {
-                emptyStateView
+                MainEmptyStateView(
+                    title: "Добавьте первую привычку",
+                    subtitle: "Маленький шаг \nк большим изменениям"
+                )
             } else {
-                cardsGridView
+                MainCardsGridView(
+                    cards: viewModel.displayableCards,
+                    timerService: timerService,
+                    onTap: { viewModel.presentTimer(card: $0) }
+                )
             }
-        }
-    }
-    
-    // MARK: - Empty State
-    
-    private var emptyStateView: some View {
-        VStack(spacing: Theme.emptyStateSpacing) {
-            Text("Добавьте первую привычку")
-                .font(.custom(Theme.headingFontName, size: Theme.emptyStateHeadingFontSize))
-                .fontWeight(.regular)
-                .foregroundColor(Theme.mainHeadingColor)
-            
-            Text("Маленький шаг \nк большим изменениям")
-                .font(.custom(Theme.headingFontName, size: Theme.emptyStateDescriptionFontSize))
-                .fontWeight(.regular)
-                .foregroundColor(Theme.mainDescriptionColor)
-                .multilineTextAlignment(.center)
-        }
-        .padding(.top, Theme.emptyStateTopPadding)
-    }
-    
-    // MARK: - Cards Grid
-    
-    private var cardsGridView: some View {
-        ScrollView {
-            LazyVGrid(
-                columns: [
-                    GridItem(.flexible(), spacing: Theme.gridColumnSpacing),
-                    GridItem(.flexible(), spacing: Theme.gridColumnSpacing)
-                ],
-                spacing: Theme.gridRowSpacing
-            ) {
-                // Отображаем карточки с учетом лимита статуса пользователя
-                ForEach(viewModel.displayableCards) { card in
-                    HabitCardView(
-                        card: card,
-                        timerService: timerService,
-                        onTap: { viewModel.presentTimer(card: $0) }
-                    )
-                    .frame(height: Theme.cardHeight)
-                }
-            }
-            .padding(.horizontal, Theme.screenPadding)
-            .padding(.top, Theme.gridTopPadding)
         }
     }
 }

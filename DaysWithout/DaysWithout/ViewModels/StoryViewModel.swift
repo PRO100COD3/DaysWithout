@@ -26,38 +26,43 @@ final class StoryViewModel: ObservableObject {
         self.card = card
         self.restartHistoryService = restartHistoryService
         self.onFullDismiss = onFullDismiss
-        loadHistory()
     }
     
     // MARK: - Навигация флоу поддержки
     
     /// Открыть экран Support (кнопка coins)
     func openSupport() {
-        isSupportPresented = true
+        Task { @MainActor in
+            await Task.yield()
+            isSupportPresented = true
+        }
     }
     
     /// Открыть экран выбора подписки (кнопка «ПОДДЕРЖАТЬ»). Скрывает Support.
     func openSelectPurchases() {
-        isSupportPresented = false
-        isSelectPurchasesPresented = true
+        Task { @MainActor in
+            await Task.yield()
+            isSupportPresented = false
+            isSelectPurchasesPresented = true
+        }
     }
     
     /// Закрыть только экраны подписки (Support, SelectPurchases, Success), Story остаётся открытым (крестик, тап мимо)
     func dismissSupportFlowKeepStory() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            self.isSelectPurchasesPresented = false
-            self.isSupportPresented = false
+        Task { @MainActor in
+            await Task.yield()
+            isSelectPurchasesPresented = false
+            isSupportPresented = false
         }
     }
     
     /// Закрыть весь флоу поддержки и экран Story («СПАСИБО» после успешной покупки)
     func dismissEntireSupportFlow() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            self.isSelectPurchasesPresented = false
-            self.isSupportPresented = false
-            self.onFullDismiss()
+        Task { @MainActor in
+            await Task.yield()
+            isSelectPurchasesPresented = false
+            isSupportPresented = false
+            onFullDismiss()
         }
     }
     
@@ -92,6 +97,9 @@ final class StoryViewModel: ObservableObject {
     }
     
     func loadHistory() {
-        history = restartHistoryService.getHistory(cardId: card.id)
+        Task { @MainActor in
+            await Task.yield()
+            history = restartHistoryService.getHistory(cardId: card.id)
+        }
     }
 }

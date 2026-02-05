@@ -53,14 +53,14 @@ struct HabitCardView: View {
             )
             
             // Контент карточки (без тени)
-            VStack(spacing: 0) {
+            VStack(spacing: Theme.cardContentStackSpacing) {
                 // Название привычки
                 Text(card.title)
                     .font(.custom(Theme.cardFontName, size: Theme.cardTitleFontSize))
                     .fontWeight(.medium)
                     .foregroundColor(Theme.cardTextHeaderColor)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .lineLimit(1)
+                    .lineLimit(Theme.cardTitleLineLimit)
                     .padding(.bottom, Theme.cardTitleBottomPadding)
                                 
                 // Прогресс-ринг с количеством дней
@@ -73,8 +73,8 @@ struct HabitCardView: View {
             .padding(.top, Theme.cardContentTopPadding)
             .padding(.bottom, Theme.cardContentBottomPadding)
         }
-        .scaleEffect(viewModel.isPressed ? Theme.cardPressScale : 1.0)
-        .opacity(viewModel.isPressed ? Theme.cardPressOpacity : 1.0)
+        .scaleEffect(viewModel.isPressed ? Theme.cardPressScale : Theme.cardIdleScale)
+        .opacity(viewModel.isPressed ? Theme.cardPressOpacity : Theme.cardIdleOpacity)
         .onTapGesture {
             viewModel.triggerPress(duration: Theme.pressAnimationDuration)
             onTap?(card)
@@ -107,10 +107,10 @@ struct HabitCardView: View {
                     )
                 )
                 .frame(width: Theme.progressRingSize, height: Theme.progressRingSize)
-                .rotationEffect(.degrees(-90))
+                .rotationEffect(.degrees(Theme.progressRingRotationDegrees))
             
             // Количество дней
-            VStack(spacing: 0) {
+            VStack(spacing: Theme.cardContentStackSpacing) {
                 Text("\(card.daysCount)")
                     .font(.custom(Theme.cardFontName, size: Theme.cardDaysCountFontSize))
                     .fontWeight(.bold)
@@ -151,5 +151,5 @@ struct HabitCardView: View {
     let timerService = TimerService(habitService: habitService)
     
     return HabitCardView(card: card, timerService: timerService)
-        .frame(width: 180, height: 0)
+        .frame(width: Theme.cardPreviewWidth, height: 0)
 }

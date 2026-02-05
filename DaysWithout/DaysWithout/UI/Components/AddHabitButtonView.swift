@@ -77,10 +77,7 @@ struct AddHabitButtonView: View {
 // MARK: - Preview
 
 #Preview {
-    ZStack {
-//        Color.gray.opacity(0.1)
-//            .ignoresSafeArea()
-        
+    ZStack {        
         AddHabitButtonView(onTap: {})
     }
 }

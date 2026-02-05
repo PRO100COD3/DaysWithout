@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-/// Причина ошибки валидации (без UI-строк; View маппит в Theme)
+/// Причина ошибки валидации (строки для алерта передаются извне через замыкания)
 enum AddHabitValidationReason: Sendable {
     case emptyTitle
     case titleTooLong(maxLength: Int)
@@ -42,6 +42,9 @@ final class AddHabitViewModel: ObservableObject {
     /// Сообщение алерта валидации (nil = алерт скрыт). View только отображает по биндингу.
     @Published private(set) var alertMessage: String?
     
+    /// Показан ли алерт о превышении лимита символов (при вводе)
+    @Published var showCharacterLimitAlert: Bool = false
+    
     // MARK: - Private Properties
     
     private let habitService: HabitServiceProtocol
@@ -52,6 +55,7 @@ final class AddHabitViewModel: ObservableObject {
     private let alertMessageForServiceError: (HabitServiceError) -> String?
     private var cancellables = Set<AnyCancellable>()
     private var alertDismissWorkItem: DispatchWorkItem?
+    private var characterLimitAlertHideTask: DispatchWorkItem?
     
     // MARK: - Initialization
     
@@ -61,7 +65,7 @@ final class AddHabitViewModel: ObservableObject {
     ///   - userStatusProvider: Провайдер статуса пользователя
     ///   - onDismiss: Замыкание для закрытия экрана (вызывается при успехе или limitExceeded)
     ///   - alertDisplayDuration: Длительность показа алерта (сек)
-    ///   - alertMessageForValidation: Маппинг причины валидации в строку для UI
+    ///   - alertMessageForValidation: Маппинг причины валидации в строку (View передаёт строки из Theme)
     ///   - alertMessageForServiceError: Маппинг ошибки сервиса в строку для алерта (nil = не показывать)
     init(
         habitService: HabitServiceProtocol,
@@ -123,13 +127,48 @@ final class AddHabitViewModel: ObservableObject {
         alertMessage = nil
     }
     
+    /// Сообщение для алерта о превышении лимита символов
+    var characterLimitAlertMessage: String {
+        alertMessageForValidation(.titleTooLong(maxLength: maxTitleLength))
+    }
+    
+    /// Обрабатывает изменение текста: ограничивает до maxTitleLength и показывает алерт при превышении
+    func handleTitleChange(_ newValue: String) {
+        if newValue.count > maxTitleLength {
+            title = String(newValue.prefix(maxTitleLength))
+            showCharacterLimitAlertFunc()
+        }
+    }
+    
+    /// Показывает алерт о превышении лимита символов на 3 секунды
+    private func showCharacterLimitAlertFunc() {
+        guard !showCharacterLimitAlert else { return }
+        
+        showCharacterLimitAlert = true
+        
+        characterLimitAlertHideTask?.cancel()
+        
+        let hideTask = DispatchWorkItem { [weak self] in
+            Task { @MainActor in
+                await Task.yield()
+                self?.showCharacterLimitAlert = false
+            }
+        }
+        characterLimitAlertHideTask = hideTask
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: hideTask)
+    }
+    
     // MARK: - Private Methods
     
     private func showAlertTemporarily(_ message: String) {
         cancelAlertTimer()
         alertMessage = message
         let workItem = DispatchWorkItem { [weak self] in
-            self?.alertMessage = nil
+            Task { @MainActor in
+                await Task.yield()
+                self?.alertMessage = nil
+            }
         }
         alertDismissWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + alertDisplayDuration, execute: workItem)
@@ -173,6 +212,14 @@ final class AddHabitViewModel: ObservableObject {
         currentCardsCount = habitService.getAll().count
         let status = userStatusProvider.getCurrentStatus()
         maxCardsLimit = status.maxCardsLimit
+    }
+    
+    /// Вызывается при появлении экрана (View только вызывает; отложенное обновление — во ViewModel)
+    func onAppear() {
+        Task { @MainActor in
+            await Task.yield()
+            updateCardsInfo()
+        }
     }
     
     // MARK: - Private Methods

@@ -5,7 +5,6 @@
 
 import Foundation
 import Combine
-import UIKit
 
 /// ViewModel экрана таймера привычки. Управляет состоянием таймера и валидацией; не содержит UI-кода.
 @MainActor
@@ -49,11 +48,30 @@ final class TimerViewModel: ObservableObject {
     private let targetSeconds: TimeInterval = 24 * 60 * 60
     private var alertHideTask: DispatchWorkItem?
     
-    init(card: HabitCard, habitService: HabitServiceProtocol, restartHistoryService: RestartHistoryServiceProtocol, onClose: @escaping () -> Void) {
+    /// Строка для алерта лимита символов названия (View передаёт замыкание с Theme)
+    private let messageForMaxLength: (Int) -> String
+    /// Строка для алерта лимита символов причины рестарта (View передаёт замыкание с Theme)
+    private let messageForRestartReasonLimit: (Int) -> String
+    
+    /// Текст сообщения алерта лимита названия (для отображения во View)
+    var characterLimitAlertMessage: String { messageForMaxLength(maxLength) }
+    /// Текст сообщения алерта лимита причины рестарта (для отображения во View)
+    var restartReasonLimitAlertMessage: String { messageForRestartReasonLimit(restartReasonMaxLength) }
+    
+    init(
+        card: HabitCard,
+        habitService: HabitServiceProtocol,
+        restartHistoryService: RestartHistoryServiceProtocol,
+        onClose: @escaping () -> Void,
+        messageForMaxLength: @escaping (Int) -> String,
+        messageForRestartReasonLimit: @escaping (Int) -> String
+    ) {
         self.card = card
         self.habitService = habitService
         self.restartHistoryService = restartHistoryService
         self.onClose = onClose
+        self.messageForMaxLength = messageForMaxLength
+        self.messageForRestartReasonLimit = messageForRestartReasonLimit
         let prefix = "Timer_\(card.id.uuidString)"
         self.startDateKey = "\(prefix)_StartDate"
         self.savedDaysKey = "\(prefix)_SavedDays"
@@ -71,6 +89,9 @@ final class TimerViewModel: ObservableObject {
         timer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in
+                await Task.yield()
+                // Не обновляем пока открыт fullScreenCover — избегаем race condition при закрытии
+                guard !self.isStoryPresented && !self.isDatePickerPresented else { return }
                 self.updateElapsedTime()
                 if self.isRunning, self.elapsedSeconds >= self.targetSeconds {
                     self.completeCycle()
@@ -104,30 +125,52 @@ final class TimerViewModel: ObservableObject {
     }
     
     func presentStory() {
-        isStoryPresented = true
+        Task { @MainActor in
+            await Task.yield()
+            isStoryPresented = true
+        }
     }
     
     func dismissStory() {
-        isStoryPresented = false
+        Task { @MainActor in
+            await Task.yield()
+            isStoryPresented = false
+            // Обновляем время после закрытия fullScreenCover
+            await Task.yield()
+            updateElapsedTime()
+        }
     }
     
     func presentDatePicker() {
-        isDatePickerPresented = true
+        Task { @MainActor in
+            await Task.yield()
+            isDatePickerPresented = true
+        }
     }
     
     func dismissDatePicker() {
-        isDatePickerPresented = false
+        Task { @MainActor in
+            await Task.yield()
+            isDatePickerPresented = false
+            // Обновляем время после закрытия fullScreenCover
+            await Task.yield()
+            updateElapsedTime()
+        }
     }
     
     /// Вызывается после выбора даты в DateView: сохраняет дату в HabitService и перезагружает состояние таймера.
     func applyNewStartDateAndDismissPicker(_ newStartDate: Date) {
-        do {
-            try habitService.updateStartDate(id: card.id, startDate: newStartDate)
-        } catch {
-            // Игнорируем ошибку (карточка могла быть удалена)
+        Task { @MainActor in
+            await Task.yield()
+            do {
+                try habitService.updateStartDate(id: card.id, startDate: newStartDate)
+            } catch {
+                // Игнорируем ошибку (карточка могла быть удалена)
+            }
+            reloadAfterStartDateChange(newStartDate: newStartDate)
+            await Task.yield()
+            isDatePickerPresented = false
         }
-        reloadAfterStartDateChange(newStartDate: newStartDate)
-        isDatePickerPresented = false
     }
     
     func handleTextChange(_ newValue: String) {
@@ -262,9 +305,12 @@ final class TimerViewModel: ObservableObject {
         saveTimerState()
     }
         
+    private static let willEnterForegroundNotificationName = Notification.Name("UIApplication.willEnterForegroundNotification")
+    private static let didEnterBackgroundNotificationName = Notification.Name("UIApplication.didEnterBackgroundNotification")
+    
     private func setupNotifications() {
         NotificationCenter.default.addObserver(
-            forName: UIApplication.willEnterForegroundNotification,
+            forName: Self.willEnterForegroundNotificationName,
             object: nil,
             queue: .main
         ) { [weak self] _ in
@@ -275,7 +321,7 @@ final class TimerViewModel: ObservableObject {
         }
         
         NotificationCenter.default.addObserver(
-            forName: UIApplication.didEnterBackgroundNotification,
+            forName: Self.didEnterBackgroundNotificationName,
             object: nil,
             queue: .main
         ) { [weak self] _ in
@@ -370,6 +416,7 @@ final class TimerViewModel: ObservableObject {
         
         let hideTask = DispatchWorkItem { [weak self] in
             Task { @MainActor in
+                await Task.yield()
                 self?.showLimitAlert = false
             }
         }
@@ -387,6 +434,7 @@ final class TimerViewModel: ObservableObject {
         
         let hideTask = DispatchWorkItem { [weak self] in
             Task { @MainActor in
+                await Task.yield()
                 self?.showRestartReasonLimitAlert = false
             }
         }

@@ -15,92 +15,92 @@ struct ConfirmationDialog: View {
     
     var body: some View {
         if isPresented {
-            VStack(spacing: 12) {
+            VStack(spacing: Theme.dialogSpacing) {
                 HStack {
                     Text("Подтвердите удаление")
-                        .font(.custom("Onest", size: 20))
+                        .font(.custom(Theme.headingFontName, size: Theme.dialogTitleFontSize))
                         .fontWeight(.bold)
-                        .foregroundColor(Color(red: 34/255, green: 34/255, blue: 34/255))
+                        .foregroundColor(Theme.dialogTitleColor)
                     
                     Spacer()
                 }
                 
                 HStack {
                     Text("Вы уверены, что хотите \nудалить эту карточку?")
-                        .font(.custom("Onest", size: 16))
+                        .font(.custom(Theme.headingFontName, size: Theme.dialogBodyFontSize))
                         .fontWeight(.regular)
-                        .foregroundColor(Color(red: 85/255, green: 85/255, blue: 85/255))
+                        .foregroundColor(Theme.dialogBodyColor)
                         .lineLimit(2)
                     
                     Spacer()
                 }
                 
-                HStack(spacing: 12) {
+                HStack(spacing: Theme.dialogSpacing) {
                     Button(action: {
-                        withAnimation(.easeInOut(duration: 0.18)) {
+                        withAnimation(.easeInOut(duration: Theme.dialogAnimationDuration)) {
                             onCancel()
                         }
                     }) {
                         Text("ОТМЕНА")
-                            .font(.custom("Onest", size: 14))
+                            .font(.custom(Theme.headingFontName, size: Theme.dialogButtonFontSize))
                             .fontWeight(.medium)
-                            .foregroundColor(Color(red: 110/255, green: 110/255, blue: 110/255))
-                            .frame(maxWidth: .infinity, maxHeight: 36)
+                            .foregroundColor(Theme.dialogCancelButtonTextColor)
+                            .frame(maxWidth: .infinity, maxHeight: Theme.dialogButtonHeight)
                             .background {
-                                RoundedRectangle(cornerRadius: 10)
+                                RoundedRectangle(cornerRadius: Theme.dialogButtonCornerRadius)
                                     .fill(Color.white)
-                                    .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+                                    .shadow(color: Color.black.opacity(Theme.dialogButtonShadowOpacity), radius: Theme.dialogButtonShadowRadius, x: 0, y: Theme.dialogButtonShadowY)
                                     .overlay {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color(red: 204/255, green: 204/255, blue: 204/255).opacity(0.8), lineWidth: 1)
+                                        RoundedRectangle(cornerRadius: Theme.dialogButtonCornerRadius)
+                                            .stroke(Theme.dialogCancelButtonBorderColor, lineWidth: 1)
                                     }
                             }
                     }
                     .pressAnimation()
-                    .padding(.top, 12)
+                    .padding(.top, Theme.dialogSpacing)
                     
                     Button(action: {
-                        withAnimation(.easeInOut(duration: 0.18)) {
+                        withAnimation(.easeInOut(duration: Theme.dialogAnimationDuration)) {
                             onConfirm()
                         }
                     }) {
                         Text("УДАЛИТЬ")
-                            .font(.custom("Onest", size: 14))
+                            .font(.custom(Theme.headingFontName, size: Theme.dialogButtonFontSize))
                             .fontWeight(.medium)
-                            .foregroundColor(Color(red: 244/255, green: 244/255, blue: 244/255))
-                            .frame(maxWidth: .infinity, maxHeight: 36)
+                            .foregroundColor(Theme.dialogRedButtonTextColor)
+                            .frame(maxWidth: .infinity, maxHeight: Theme.dialogButtonHeight)
                             .background {
-                                RoundedRectangle(cornerRadius: 10)
+                                RoundedRectangle(cornerRadius: Theme.dialogButtonCornerRadius)
                                     .fill(Theme.redButton)
-                                    .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+                                    .shadow(color: Color.black.opacity(Theme.dialogButtonShadowOpacity), radius: Theme.dialogButtonShadowRadius, x: 0, y: Theme.dialogButtonShadowY)
                                     .overlay {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color(red: 208/255, green: 208/255, blue: 208/255).opacity(0.9), lineWidth: 1)
+                                        RoundedRectangle(cornerRadius: Theme.dialogButtonCornerRadius)
+                                            .stroke(Theme.dialogRedButtonBorderColor, lineWidth: 1)
                                     }
                             }
                     }
                     .pressAnimation()
-                    .padding(.top, 12)
+                    .padding(.top, Theme.dialogSpacing)
                 }
             }
-            .padding(24)
+            .padding(Theme.dialogPadding)
             .background {
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: Theme.dialogCornerRadius)
                     .fill(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 0.984, green: 0.984, blue: 0.984),
-                                Color(red: 0.922, green: 0.922, blue: 0.922)
+                                Theme.dialogGradientTop,
+                                Theme.dialogGradientBottom
                             ]),
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
-                    .shadow(color: Color.black.opacity(0.25), radius: 12, x: 0, y: 4)
+                    .shadow(color: Color.black.opacity(Theme.dialogShadowOpacity), radius: Theme.dialogShadowRadius, x: 0, y: Theme.dialogShadowY)
             }
-            .padding(.horizontal, 37)
-            .opacity(isPresented ? 1.0 : 0.0)
-            .scaleEffect(isPresented ? 1.0 : 0.95)
+            .padding(.horizontal, Theme.dialogHorizontalPadding)
+            .opacity(isPresented ? Theme.dialogPresentedOpacity : Theme.dialogDismissedOpacity)
+            .scaleEffect(isPresented ? Theme.dialogPresentedScale : Theme.dialogDismissedScale)
         }
     }
 }

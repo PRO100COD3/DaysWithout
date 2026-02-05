@@ -47,22 +47,34 @@ final class MainViewModel: ObservableObject {
     
     /// Показать экран добавления привычки
     func presentAddHabit() {
-        isAddHabitPresented = true
+        Task { @MainActor in
+            await Task.yield()
+            isAddHabitPresented = true
+        }
     }
     
     /// Закрыть экран добавления привычки (после добавления или отмены)
     func dismissAddHabit() {
-        isAddHabitPresented = false
+        Task { @MainActor in
+            await Task.yield()
+            isAddHabitPresented = false
+        }
     }
     
     /// Показать экран таймера для карточки привычки
     func presentTimer(card: HabitCard) {
-        selectedCardForTimer = card
+        Task { @MainActor in
+            await Task.yield()
+            selectedCardForTimer = card
+        }
     }
     
     /// Закрыть экран таймера
     func dismissTimer() {
-        selectedCardForTimer = nil
+        Task { @MainActor in
+            await Task.yield()
+            selectedCardForTimer = nil
+        }
     }
     
     // MARK: - Private Properties
@@ -108,7 +120,10 @@ final class MainViewModel: ObservableObject {
         habitService.cardsPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] updatedCards in
-                self?.cards = updatedCards
+                Task { @MainActor in
+                    await Task.yield()
+                    self?.cards = updatedCards
+                }
             }
             .store(in: &cancellables)
     }

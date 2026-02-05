@@ -37,35 +37,35 @@ struct CircularProgressView: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.4), lineWidth: 14)
-                .frame(width: 280, height: 280)
+                .stroke(Color.white.opacity(Theme.circularProgressRingBackgroundOpacity), lineWidth: Theme.circularProgressRingLineWidth)
+                .frame(width: Theme.circularProgressRingSize, height: Theme.circularProgressRingSize)
             
             Circle()
                 .trim(from: 0, to: progress)
                 .stroke(
                     Color.white,
-                    style: StrokeStyle(lineWidth: 14, lineCap: .round)
+                    style: StrokeStyle(lineWidth: Theme.circularProgressRingLineWidth, lineCap: .round)
                 )
-                .frame(width: 280, height: 280)
-                .rotationEffect(.degrees(-90))
+                .frame(width: Theme.circularProgressRingSize, height: Theme.circularProgressRingSize)
+                .rotationEffect(.degrees(Theme.circularProgressRingRotationDegrees))
             
-            VStack(spacing: 0) {
+            VStack(spacing: Theme.circularProgressContentStackSpacing) {
                 Text("\(days)")
-                    .font(.custom("Onest", size: 50))
+                    .font(.custom(Theme.headingFontName, size: Theme.circularProgressDaysFontSize))
                     .fontWeight(.medium)
-                    .foregroundColor(.white)
+                    .foregroundColor(Theme.circularProgressTextColor)
                 
                 Text(daysWord)
-                    .font(.custom("Onest", size: 18))
+                    .font(.custom(Theme.headingFontName, size: Theme.circularProgressDaysWordFontSize))
                     .fontWeight(.medium)
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(.top, 4)
+                    .foregroundColor(Theme.circularProgressTextColor.opacity(Theme.circularProgressDaysWordOpacity))
+                    .padding(.top, Theme.circularProgressDaysWordTopPadding)
                 
                 Text(timeString)
-                    .font(.custom("Onest", size: 24))
+                    .font(.custom(Theme.headingFontName, size: Theme.circularProgressTimeFontSize))
                     .fontWeight(.medium)
-                    .foregroundColor(.white)
-                    .padding(.top, 16)
+                    .foregroundColor(Theme.circularProgressTextColor)
+                    .padding(.top, Theme.circularProgressTimeTopPadding)
             }
         }
     }

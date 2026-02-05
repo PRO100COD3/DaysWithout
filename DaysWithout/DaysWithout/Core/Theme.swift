@@ -190,7 +190,13 @@ enum Theme {
     
     /// Отступ grid сверху
     static let gridTopPadding: CGFloat = 0
-    
+    /// Отступ между блоками во VStack главного экрана (0 = без отступа)
+    static let mainContentStackSpacing: CGFloat = 0
+    /// zIndex оверлея модального окна AddHabit
+    static let mainModalZIndex: Double = 1000
+    /// Количество колонок в сетке карточек
+    static let mainGridColumnCount: Int = 2
+
     // MARK: - Card Spacing
     
     /// Отступ названия карточки снизу
@@ -207,6 +213,8 @@ enum Theme {
     
     /// Высота карточки
     static let cardHeight: CGFloat = 216
+    /// Ширина карточки в Preview (для корректного отображения)
+    static let cardPreviewWidth: CGFloat = 180
     
     // MARK: - Progress Ring
     
@@ -215,7 +223,20 @@ enum Theme {
     
     /// Прозрачность фонового круга прогресс-ринга
     static let progressRingBackgroundOpacity: Double = 0.4
-    
+    /// Поворот прогресс-ринга в градусах (старт сверху)
+    static let progressRingRotationDegrees: Double = -90
+
+    // MARK: - Card Content
+
+    /// Отступ между элементами во VStack контента карточки (0 = без отступа)
+    static let cardContentStackSpacing: CGFloat = 0
+    /// Масштаб карточки в покое
+    static let cardIdleScale: CGFloat = 1.0
+    /// Прозрачность карточки в покое
+    static let cardIdleOpacity: Double = 1.0
+    /// Лимит строк в названии карточки
+    static let cardTitleLineLimit: Int = 1
+
     // MARK: - Press Animation
     
     /// Масштаб при нажатии на карточку
@@ -229,6 +250,11 @@ enum Theme {
     
     /// Прозрачность при нажатии на кнопку
     static let buttonPressOpacity: Double = 0.8
+
+    /// Масштаб при нажатии (универсальный модификатор pressAnimation)
+    static let pressModifierScale: CGFloat = 0.95
+    /// Прозрачность при нажатии (универсальный модификатор pressAnimation)
+    static let pressModifierOpacity: Double = 0.9
     
     /// Цвет иконки кнопки "Добавить"
     static let addButtonIconColor = Color.white
@@ -243,6 +269,18 @@ enum Theme {
     
     // MARK: - AddHabit Modal
     
+    /// Отступ между блоками во VStack контента AddHabit (0 = без отступа)
+    static let addHabitContentStackSpacing: CGFloat = 0
+    /// Толщина обводки модального окна AddHabit
+    static let addHabitModalStrokeLineWidth: CGFloat = 1
+    /// Толщина обводки поля ввода AddHabit
+    static let addHabitInputBorderLineWidth: CGFloat = 1
+    /// Толщина обводки кнопок ОТМЕНА/СОЗДАТЬ
+    static let addHabitButtonStrokeLineWidth: CGFloat = 1
+    /// Количество колонок в сетке выбора цвета (4 колонки × 2 ряда = 8 цветов)
+    static let addHabitColorGridColumnCount: Int = 4
+    /// Количество доступных цветов карточки
+    static let addHabitColorCount: Int = 8
     /// Горизонтальный отступ модального окна AddHabit от краёв экрана (MainView)
     static let addHabitModalHorizontalMargin: CGFloat = 56
     /// Радиус размытия фона главного экрана при открытии модалки AddHabit (0 = без размытия)
@@ -380,4 +418,326 @@ enum Theme {
     
     /// Цвет красной кнопки (диалоги удаления/рестарта)
     static let redButton = Color(red: 231/255, green: 84/255, blue: 84/255)
+
+    // MARK: - Story
+
+    static let storyHeaderChevronFontSize: CGFloat = 14
+    static let storyHeaderButtonSize: CGFloat = 24
+    static let storyHeaderTitleFontSize: CGFloat = 20
+    static let storyHeaderCoinsButtonSize: CGFloat = 36
+    static let storyHeaderHorizontalPadding: CGFloat = 16
+    static let storyHeaderTopPadding: CGFloat = 7
+    static let storyPlaceholderFontSize: CGFloat = 18
+    static let storyPlaceholderTopPadding: CGFloat = 37
+    static let storyHistoryListSpacing: CGFloat = 16
+    static let storyHistoryListTopPadding: CGFloat = 44
+    static let storyHistoryCellInternalSpacing: CGFloat = 14
+    static let storyHistoryCellDaysFontSize: CGFloat = 18
+    static let storyHistoryCellReasonFontSize: CGFloat = 18
+    static let storyHistoryCellDateFontSize: CGFloat = 16
+    static let storyHistoryCellGreen = Color(red: 72/255, green: 153/255, blue: 39/255)
+    static let storyHistoryCellReasonColor = Color(red: 154/255, green: 154/255, blue: 154/255)
+    static let storyHistoryCellDateColor = Color(red: 85/255, green: 85/255, blue: 85/255)
+    static let storyHistoryCellHorizontalPadding: CGFloat = 20
+    static let storyHistoryCellVerticalPadding: CGFloat = 24
+    static let storyHistoryCellBackgroundOpacity: Double = 0.95
+    static let storyHistoryCellCornerRadius: CGFloat = 24
+    static let storyHistoryCellStrokeOpacity: Double = 0.08
+    static let storyHistoryCellShadowOpacity: Double = 0.06
+    static let storyHistoryCellShadowRadius: CGFloat = 36
+    static let storyHistoryCellShadowY: CGFloat = 8
+    /// Отступ между блоками во VStack StoryView (0 = без отступа)
+    static let storyContentStackSpacing: CGFloat = 0
+    /// Цвет заголовка (название карточки) в хедере Story
+    static let storyHeaderTitleColor = Color.black
+    /// Толщина обводки ячейки истории
+    static let storyHistoryCellStrokeLineWidth: CGFloat = 1
+
+    // MARK: - Support
+
+    static let supportTitleFontSize: CGFloat = 20
+    static let supportTitleColor = Color(red: 34/255, green: 34/255, blue: 34/255)
+    static let supportTitleTopPadding: CGFloat = 24
+    static let supportContentHorizontalPadding: CGFloat = 24
+    static let supportMessageFontSize: CGFloat = 16
+    static let supportMessageColor = Color(red: 109/255, green: 109/255, blue: 109/255)
+    static let supportMessageTopPadding: CGFloat = 12
+    static let supportButtonFontSize: CGFloat = 14
+    static let supportButtonTextColor = Color(red: 173/255, green: 133/255, blue: 17/255)
+    static let supportButtonVerticalPadding: CGFloat = 12
+    static let supportButtonBackgroundColor = Color(red: 255/255, green: 211/255, blue: 34/255).opacity(0.8)
+    static let supportButtonCornerRadius: CGFloat = 14
+    static let supportButtonStrokeColor = Color(red: 248/255, green: 224/255, blue: 130/255)
+    static let supportContentPadding: CGFloat = 24
+    static let supportButtonShadowRadius: CGFloat = 8
+    static let supportButtonShadowY: CGFloat = 4
+    static let supportCloseButtonFontSize: CGFloat = 16
+    static let supportCloseButtonSize: CGFloat = 36
+    static let supportCloseButtonPadding: CGFloat = 10
+    /// Отступ между блоками во VStack SupportView (0 = без отступа)
+    static let supportContentStackSpacing: CGFloat = 0
+    /// Толщина обводки кнопки и модалки Support
+    static let supportStrokeLineWidth: CGFloat = 1
+
+    // MARK: - SelectPurchases
+
+    static let selectPurchasesHeaderTopPadding: CGFloat = 24
+    static let selectPurchasesOptionsTopPadding: CGFloat = 15
+    static let selectPurchasesHeaderSpacing: CGFloat = 12
+    static let selectPurchasesTitleFontSize: CGFloat = 20
+    static let selectPurchasesDescriptionFontSize: CGFloat = 16
+    static let selectPurchasesDescriptionColor = Color(red: 109/255, green: 109/255, blue: 109/255)
+    static let selectPurchasesOptionsSpacing: CGFloat = 12
+    static let selectPurchasesOptionPriceFontSize: CGFloat = 20
+    static let selectPurchasesOptionPeriodFontSize: CGFloat = 16
+    static let selectPurchasesOptionTextColor = Color(red: 43/255, green: 43/255, blue: 43/255)
+    static let selectPurchasesOptionSelectedSubtextColor = Color(red: 232/255, green: 255/255, blue: 232/255)
+    static let selectPurchasesOptionSelectedGradientTop = Color(red: 133/255, green: 239/255, blue: 163/255)
+    static let selectPurchasesOptionSelectedGradientBottom = Color(red: 91/255, green: 203/255, blue: 121/255)
+    static let selectPurchasesOptionPadding: CGFloat = 16
+    static let selectPurchasesOptionCornerRadius: CGFloat = 18
+    static let selectPurchasesOptionShadowRadius: CGFloat = 12
+    static let selectPurchasesOptionShadowY: CGFloat = 2
+    /// Прозрачность текста периода у невыбранной опции
+    static let selectPurchasesOptionUnselectedOpacity: Double = 0.6
+    static let selectPurchasesSubscribeButtonFontSize: CGFloat = 14
+    static let selectPurchasesSubscribeButtonStrokeCornerRadius: CGFloat = 14
+    static let selectPurchasesSubscribeButtonShadowRadius: CGFloat = 8
+    static let selectPurchasesSubscribeButtonShadowY: CGFloat = 4
+    static let selectPurchasesCloseButtonFontSize: CGFloat = 18
+    static let selectPurchasesCloseButtonSize: CGFloat = 36
+    static let selectPurchasesCloseButtonPadding: CGFloat = 10
+    static let selectPurchasesBottomVerticalPadding: CGFloat = 24
+    /// Отступ между блоками во VStack SelectPurchasesView (0 = без отступа)
+    static let selectPurchasesContentStackSpacing: CGFloat = 0
+    /// Цвет текста цены у выбранной опции
+    static let selectPurchasesOptionSelectedTextColor = Color.white
+    /// Фон невыбранной опции
+    static let selectPurchasesOptionUnselectedBackground = Color.white
+    /// Толщина обводки модалки и кнопки подписки
+    static let selectPurchasesStrokeLineWidth: CGFloat = 1
+    /// Прозрачность при скрытии контента (показан Success)
+    static let selectPurchasesHiddenOpacity: Double = 0
+    /// Прозрачность при отображении контента
+    static let selectPurchasesVisibleOpacity: Double = 1
+
+    // MARK: - SuccessPurchases
+
+    static let successTitleFontSize: CGFloat = 20
+    static let successTitleTopPadding: CGFloat = 24
+    static let successMessageFontSize: CGFloat = 16
+    static let successMessageTopPadding: CGFloat = 12
+    static let successMessageHorizontalPadding: CGFloat = 24
+    static let successButtonFontSize: CGFloat = 14
+    static let successButtonHeight: CGFloat = 50
+    static let successButtonCornerRadius: CGFloat = 14
+    static let successContentVerticalPadding: CGFloat = 24
+    static let successButtonShadowRadius: CGFloat = 8
+    static let successButtonShadowY: CGFloat = 4
+    static let successModalStrokeCornerRadius: CGFloat = 25
+    static let successModalShadowRadius: CGFloat = 25
+    static let successModalShadowY: CGFloat = 10
+    static let successCloseButtonFontSize: CGFloat = 16
+    static let successCloseButtonSize: CGFloat = 36
+    static let successCloseButtonPadding: CGFloat = 10
+    /// Отступ между блоками во VStack SuccessPurchasesView (0 = без отступа)
+    static let successContentStackSpacing: CGFloat = 0
+    /// Толщина обводки модалки Success
+    static let successModalStrokeLineWidth: CGFloat = 1
+
+    // MARK: - Date
+
+    static let dateContentHorizontalPadding: CGFloat = 23
+    static let dateHeaderChevronFontSize: CGFloat = 14
+    static let dateHeaderBackButtonSize: CGFloat = 24
+    static let dateHeaderTitleFontSize: CGFloat = 20
+    static let dateHeaderPlaceholderSize: CGSize = CGSize(width: 34, height: 36)
+    static let dateHeaderHorizontalPadding: CGFloat = 16
+    static let dateCalendarCardSpacing: CGFloat = 13
+    static let dateCalendarNavButtonFontSize: CGFloat = 16
+    static let dateCalendarNavGreen = Color(red: 72/255, green: 153/255, blue: 79/255)
+    static let dateCalendarNavButtonPadding: CGFloat = 6
+    static let dateCalendarMonthFontSize: CGFloat = 20
+    static let dateCalendarWeekdayFontSize: CGFloat = 14
+    static let dateCalendarWeekdayColor = Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.3)
+    static let dateCalendarGridItemSpacing: CGFloat = 8
+    static let dateCalendarGridRowSpacing: CGFloat = 7
+    /// Количество колонок в сетке календаря (дней в неделе)
+    static let dateCalendarWeekdayColumnCount: Int = 7
+    static let dateCalendarDayFontSize: CGFloat = 18
+    static let dateCalendarDayCellSize: CGFloat = 44
+    static let dateCalendarDaySelectedBackground = Color(red: 217/255, green: 248/255, blue: 201/255)
+    static let dateCalendarEmptyCellSize: CGFloat = 36
+    static let dateCalendarCardTopPadding: CGFloat = 24
+    static let dateCalendarCardHorizontalPadding: CGFloat = 20
+    static let dateCalendarCardBackgroundOpacity: Double = 0.85
+    static let dateCalendarCardCornerRadius: CGFloat = 25
+    static let dateCalendarCardStrokeOpacity: Double = 0.08
+    static let dateCalendarCardStrokeLineWidth: CGFloat = 1
+    static let dateCalendarCardShadowRadius: CGFloat = 25
+    static let dateCalendarCardShadowY: CGFloat = 10
+    static let dateCalendarCardButtonShadowRadius: CGFloat = 8
+    static let dateCalendarCardButtonShadowY: CGFloat = 4
+    static let dateTimeWheelRowHeight: CGFloat = 34
+    static let dateTimeWheelVisibleHeight: CGFloat = 200
+    static let dateTimeWheelTopPadding: CGFloat = 24
+    static let dateTimeCardButtonTopPadding: CGFloat = 16
+    static let dateCreateButtonFontSize: CGFloat = 14
+    static let dateCreateButtonTextColor = Color(red: 72/255, green: 153/255, blue: 79/255)
+    static let dateCreateButtonVerticalPadding: CGFloat = 14
+    static let dateCreateButtonBackgroundColor = Color(red: 217/255, green: 248/255, blue: 201/255)
+    static let dateCreateButtonCornerRadius: CGFloat = 12
+    static let dateCreateButtonTopPadding: CGFloat = 24
+    static let dateCreateButtonBottomPadding: CGFloat = 24
+    static let dateTimePickerRowHeight: CGFloat = 34
+    static let dateTimePickerComponentWidth: CGFloat = 50
+    /// Количество компонентов пикера (часы + минуты)
+    static let dateTimePickerComponentCount: Int = 2
+    /// Количество часов в сутках для пикера
+    static let dateTimePickerHoursCount: Int = 24
+    /// Количество минут в часе для пикера
+    static let dateTimePickerMinutesCount: Int = 60
+    /// Отступ между блоками во VStack на экране Date (0 = без отступа)
+    static let dateContentStackSpacing: CGFloat = 0
+
+    // MARK: - Timer
+
+    static let timerGradientTop = Color(red: 127/255, green: 238/255, blue: 210/255)
+    static let timerGradientBottom = Color(red: 53/255, green: 192/255, blue: 164/255)
+    static let timerCloseCircleSize: CGFloat = 32
+    static let timerCloseCircleColor = Color.white
+    static let timerCloseCircleOpacity: Double = 0.18
+    static let timerCloseButtonFontSize: CGFloat = 18
+    static let timerCloseButtonFrameSize: CGFloat = 44
+    static let timerCloseButtonTopPadding: CGFloat = 3
+    static let timerCloseButtonTrailingPadding: CGFloat = 14
+    static let timerTextFieldFontSize: CGFloat = 24
+    static let timerTextFieldTopPadding: CGFloat = 46
+    static let timerTextFieldHorizontalPadding: CGFloat = 20
+    static let timerProgressTopPadding: CGFloat = 53
+    static let timerRestartButtonFontSize: CGFloat = 20
+    static let timerRestartButtonVerticalPadding: CGFloat = 16
+    static let timerRestartButtonCornerRadius: CGFloat = 10
+    static let timerRestartButtonBackgroundOpacity: Double = 0.3
+    static let timerRestartButtonStrokeOpacity: Double = 0.8
+    static let timerRestartButtonWidth: CGFloat = 115
+    static let timerRestartButtonHeight: CGFloat = 37
+    static let timerRestartButtonTopPadding: CGFloat = 68
+    static let timerActionsSpacing: CGFloat = 80
+    static let timerActionIconFontSize: CGFloat = 24
+    static let timerActionVerticalPadding: CGFloat = 16
+    static let timerActionsTopPadding: CGFloat = 57
+    static let timerActionsHorizontalPadding: CGFloat = 67
+    static let timerOverlayBlurRadius: CGFloat = 8
+    static let timerOverlayOpacity: Double = 0.3
+    static let timerAlertPadding: CGFloat = 24
+    static let timerRestartDialogTopPadding: CGFloat = 238
+    static let timerCloseDialogTopPadding: CGFloat = 270
+    /// Цвет заливки кнопки РЕСТАРТ (белый полупрозрачный)
+    static let timerRestartButtonBackgroundColor = Color(red: 1, green: 1, blue: 1)
+    /// Отступ между блоками во VStack TimerView (0 = без отступа)
+    static let timerContentStackSpacing: CGFloat = 0
+    /// Основной цвет текста и иконок на экране таймера (белый на градиенте)
+    static let timerPrimaryTextColor = Color.white
+    /// Толщина обводки кнопки РЕСТАРТ
+    static let timerRestartButtonStrokeLineWidth: CGFloat = 1
+
+    // MARK: - Common Overlay
+
+    /// Прозрачность затемнённого фона модальных экранов (overlay)
+    static let modalOverlayOpacity: Double = 0.3
+
+    // MARK: - CircularProgressView (Timer screen)
+
+    static let circularProgressRingSize: CGFloat = 280
+    static let circularProgressRingLineWidth: CGFloat = 14
+    static let circularProgressRingBackgroundOpacity: Double = 0.4
+    static let circularProgressDaysFontSize: CGFloat = 50
+    static let circularProgressDaysWordFontSize: CGFloat = 18
+    static let circularProgressDaysWordTopPadding: CGFloat = 4
+    static let circularProgressDaysWordOpacity: Double = 0.8
+    static let circularProgressTimeFontSize: CGFloat = 24
+    static let circularProgressTimeTopPadding: CGFloat = 16
+    /// Отступ между элементами во VStack CircularProgressView (0 = без отступа)
+    static let circularProgressContentStackSpacing: CGFloat = 0
+    /// Цвет текста количества дней и времени в CircularProgressView
+    static let circularProgressTextColor = Color.white
+    /// Поворот кольца в CircularProgressView (старт сверху)
+    static let circularProgressRingRotationDegrees: Double = -90
+
+    // MARK: - Date time wheel lines
+
+    static let dateTimeWheelLineOpacity: Double = 0.12
+    static let dateTimeWheelLineHeight: CGFloat = 1
+
+    // MARK: - RestartDialog / ConfirmationDialog
+
+    static let dialogPadding: CGFloat = 24
+    static let dialogCornerRadius: CGFloat = 20
+    static let dialogGradientTop = Color(red: 0.984, green: 0.984, blue: 0.984)
+    static let dialogGradientBottom = Color(red: 0.922, green: 0.922, blue: 0.922)
+    static let dialogShadowOpacity: Double = 0.25
+    static let dialogShadowRadius: CGFloat = 12
+    static let dialogShadowY: CGFloat = 4
+    static let dialogHorizontalPadding: CGFloat = 37
+    static let dialogTitleFontSize: CGFloat = 20
+    static let dialogTitleColor = Color(red: 34/255, green: 34/255, blue: 34/255)
+    static let dialogBodyFontSize: CGFloat = 16
+    static let dialogBodyColor = Color(red: 85/255, green: 85/255, blue: 85/255)
+    static let dialogSpacing: CGFloat = 12
+    static let dialogButtonFontSize: CGFloat = 14
+    static let dialogButtonHeight: CGFloat = 36
+    static let dialogButtonCornerRadius: CGFloat = 10
+    static let dialogButtonShadowOpacity: Double = 0.12
+    static let dialogButtonShadowRadius: CGFloat = 12
+    static let dialogButtonShadowY: CGFloat = 4
+    static let dialogCancelButtonTextColor = Color(red: 110/255, green: 110/255, blue: 110/255)
+    static let dialogRedButtonTextColor = Color(red: 244/255, green: 244/255, blue: 244/255)
+    static let dialogCancelButtonBorderColor = Color(red: 204/255, green: 204/255, blue: 204/255).opacity(0.8)
+    static let dialogRedButtonBorderColor = Color(red: 208/255, green: 208/255, blue: 208/255).opacity(0.9)
+    static let dialogAnimationDuration: Double = 0.18
+    static let dialogPresentedOpacity: Double = 1.0
+    static let dialogDismissedOpacity: Double = 0.0
+    static let dialogPresentedScale: CGFloat = 1.0
+    static let dialogDismissedScale: CGFloat = 0.95
+
+    // MARK: - RestartDialog (specific)
+
+    static let restartDialogTextEditorFontSize: CGFloat = 14
+    static let restartDialogInputBackgroundColor = Color(red: 247/255, green: 247/255, blue: 247/255)
+    static let restartDialogInputBorderColorNormal = Color(red: 230/255, green: 230/255, blue: 230/255)
+    static let restartDialogInputPlaceholderColor = Color(red: 156/255, green: 163/255, blue: 175/255)
+    static let restartDialogInputPaddingH: CGFloat = 7
+    static let restartDialogInputPaddingV: CGFloat = 7
+    static let restartDialogInputPaddingTrailing: CGFloat = 5
+    static let restartDialogPlaceholderPaddingH: CGFloat = 12
+    static let restartDialogPlaceholderPaddingV: CGFloat = 15
+    static let restartDialogTextEditorMinHeight: CGFloat = 48
+    static let restartDialogTextEditorMaxHeight: CGFloat = 66
+    static let restartDialogHeightAnimationDuration: Double = 0.15
+    /// Горизонтальный вычет для расчёта ширины текста (padding left + right)
+    static let restartDialogCalculateWidthInset: CGFloat = 19
+    /// Вертикальный отступ текста (padding top/bottom при расчёте высоты)
+    static let restartDialogCalculateVerticalInset: CGFloat = 14
+    /// Доп. отступ снизу при расчёте высоты
+    static let restartDialogCalculateBottomInset: CGFloat = 16
+
+    // MARK: - AddHabit color circle stroke
+
+    static let addHabitColorCircleSelectedStrokeWidth: CGFloat = 3
+    
+    /// Горизонтальный отступ алерта от краёв модального окна AddHabit (отрицательный для выхода за границы)
+    static let addHabitAlertHorizontalPaddingAlert: CGFloat = -32
+
+    // MARK: - CharacterLimitAlertView
+
+    static let characterLimitAlertTextColor = Color.white
+
+    // MARK: - Preview (preview backgrounds)
+
+    static let previewOverlayGrayOpacity: Double = 0.5
+    static let previewOverlayGreenOpacity: Double = 0.3
+    static let previewOverlayLightOpacity: Double = 0.1
+    /// Фон Preview для SuccessPurchasesView
+    static let previewBackgroundWhite = Color.white
 }

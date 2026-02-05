@@ -19,7 +19,14 @@ struct TimerView: View {
         self.habitService = habitService
         self.restartHistoryService = restartHistoryService
         self.onDismiss = onDismiss
-        _viewModel = StateObject(wrappedValue: TimerViewModel(card: card, habitService: habitService, restartHistoryService: restartHistoryService, onClose: onDismiss))
+        _viewModel = StateObject(wrappedValue: TimerViewModel(
+            card: card,
+            habitService: habitService,
+            restartHistoryService: restartHistoryService,
+            onClose: onDismiss,
+            messageForMaxLength: { Theme.addHabitAlertMaxCharacters($0) },
+            messageForRestartReasonLimit: { Theme.addHabitAlertMaxCharacters($0) }
+        ))
     }
     
     var body: some View {
@@ -27,42 +34,42 @@ struct TimerView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(red: 127/255, green: 238/255, blue: 210/255),
-                        Color(red: 53/255, green: 192/255, blue: 164/255)
+                        Theme.timerGradientTop,
+                        Theme.timerGradientBottom
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
                 .ignoresSafeArea(.all)
                 
-                VStack(spacing: 0) {
+                VStack(spacing: Theme.timerContentStackSpacing) {
                     HStack {
                         Spacer()
                         Button(action: onDismiss) {
                             ZStack {
                                 Circle()
-                                    .fill(Color.white.opacity(0.18))
-                                    .frame(width: 32, height: 32)
+                                    .fill(Theme.timerCloseCircleColor.opacity(Theme.timerCloseCircleOpacity))
+                                    .frame(width: Theme.timerCloseCircleSize, height: Theme.timerCloseCircleSize)
                                 
                                 Image(systemName: "xmark")
-                                    .font(.system(size: 18, weight: .black))
-                                    .foregroundColor(.white)
+                                    .font(.system(size: Theme.timerCloseButtonFontSize, weight: .black))
+                                    .foregroundColor(Theme.timerPrimaryTextColor)
                             }
                         }
-                        .frame(width: 44, height: 44)
-                        .padding(.top, 3)
-                        .padding(.trailing, 14)
+                        .frame(width: Theme.timerCloseButtonFrameSize, height: Theme.timerCloseButtonFrameSize)
+                        .padding(.top, Theme.timerCloseButtonTopPadding)
+                        .padding(.trailing, Theme.timerCloseButtonTrailingPadding)
                         .pressAnimation()
                     }
                     
                     TextField("", text: $viewModel.text)
-                        .font(.custom(Theme.headingFontName, size: 24))
+                        .font(.custom(Theme.headingFontName, size: Theme.timerTextFieldFontSize))
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)
                         .textFieldStyle(PlainTextFieldStyle())
-                        .foregroundColor(.white)
-                        .padding(.top, 46)
-                        .padding(.horizontal, 20)
+                        .foregroundColor(Theme.timerPrimaryTextColor)
+                        .padding(.top, Theme.timerTextFieldTopPadding)
+                        .padding(.horizontal, Theme.timerTextFieldHorizontalPadding)
                         .onChange(of: viewModel.text) { newValue in
                             viewModel.handleTextChange(newValue)
                         }
@@ -72,47 +79,47 @@ struct TimerView: View {
                         days: viewModel.days,
                         timeString: viewModel.timeString
                     )
-                    .padding(.top, 53)
+                    .padding(.top, Theme.timerProgressTopPadding)
                     
                     Button(action: viewModel.handleMainButtonTap) {
                         Text("РЕСТАРТ")
-                            .font(.custom("Onest", size: 20))
+                            .font(.custom(Theme.headingFontName, size: Theme.timerRestartButtonFontSize))
                             .fontWeight(.regular)
-                            .foregroundColor(.white)
+                            .foregroundColor(Theme.timerPrimaryTextColor)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
+                            .padding(.vertical, Theme.timerRestartButtonVerticalPadding)
                             .background {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color(red: 1, green: 1, blue: 1))
-                                    .opacity(0.3)
+                                RoundedRectangle(cornerRadius: Theme.timerRestartButtonCornerRadius)
+                                    .fill(Theme.timerRestartButtonBackgroundColor)
+                                    .opacity(Theme.timerRestartButtonBackgroundOpacity)
                                     .overlay {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.white.opacity(0.8), lineWidth: 1)
+                                        RoundedRectangle(cornerRadius: Theme.timerRestartButtonCornerRadius)
+                                            .stroke(Theme.timerPrimaryTextColor.opacity(Theme.timerRestartButtonStrokeOpacity), lineWidth: Theme.timerRestartButtonStrokeLineWidth)
                                     }
-                                    .frame(width: 115, height: 37)
+                                    .frame(width: Theme.timerRestartButtonWidth, height: Theme.timerRestartButtonHeight)
                                     
                             }
                     }
-                    .frame(width: 115, height: 37)
-                    .padding(.top, 68)
+                    .frame(width: Theme.timerRestartButtonWidth, height: Theme.timerRestartButtonHeight)
+                    .padding(.top, Theme.timerRestartButtonTopPadding)
                     .pressAnimation()
                     
-                    HStack(spacing: 80) {
+                    HStack(spacing: Theme.timerActionsSpacing) {
                         Button(action: viewModel.presentStory) {
                             Image("book")
-                                .font(.system(size: 24))
-                                .foregroundColor(.white)
+                                .font(.system(size: Theme.timerActionIconFontSize))
+                                .foregroundColor(Theme.timerPrimaryTextColor)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
+                                .padding(.vertical, Theme.timerActionVerticalPadding)
                         }
                         .pressAnimation()
                         
                         Button(action: viewModel.presentDatePicker) {
                             Image("time")
-                                .font(.system(size: 24))
-                                .foregroundColor(.white)
+                                .font(.system(size: Theme.timerActionIconFontSize))
+                                .foregroundColor(Theme.timerPrimaryTextColor)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
+                                .padding(.vertical, Theme.timerActionVerticalPadding)
                                 
                         }
                         .pressAnimation()
@@ -121,23 +128,23 @@ struct TimerView: View {
                             viewModel.showCloseDialog()
                         }) {
                             Image("trash")
-                                .font(.system(size: 24))
-                                .foregroundColor(.white)
+                                .font(.system(size: Theme.timerActionIconFontSize))
+                                .foregroundColor(Theme.timerPrimaryTextColor)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
+                                .padding(.vertical, Theme.timerActionVerticalPadding)
                         }
                         .pressAnimation()
                     }
-                    .padding(.top, 57)
-                    .padding([.leading, .trailing], 67)
+                    .padding(.top, Theme.timerActionsTopPadding)
+                    .padding([.leading, .trailing], Theme.timerActionsHorizontalPadding)
                     
                     Spacer()
                 }
             }
-            .blur(radius: viewModel.shouldShowRestartDialog || viewModel.shouldShowCloseDialog ? 8 : 0)
+            .blur(radius: viewModel.shouldShowRestartDialog || viewModel.shouldShowCloseDialog ? Theme.timerOverlayBlurRadius : 0)
             .overlay {
                 if viewModel.shouldShowRestartDialog || viewModel.shouldShowCloseDialog {
-                    Color.black.opacity(0.3)
+                    Color.black.opacity(Theme.timerOverlayOpacity)
                         .ignoresSafeArea()
                 }
             }
@@ -150,19 +157,19 @@ struct TimerView: View {
             .overlay(alignment: .top) {
                 if viewModel.showLimitAlert {
                     CharacterLimitAlertView(
-                        message: Theme.addHabitAlertMaxCharacters(viewModel.maxLength),
+                        message: viewModel.characterLimitAlertMessage,
                         isPresented: $viewModel.showLimitAlert
                     )
-                    .padding(24)
+                    .padding(Theme.timerAlertPadding)
                 }
             }
             .overlay(alignment: .top) {
                 if viewModel.showRestartReasonLimitAlert {
                     CharacterLimitAlertView(
-                        message: Theme.addHabitAlertMaxCharacters(viewModel.restartReasonMaxLength),
+                        message: viewModel.restartReasonLimitAlertMessage,
                         isPresented: $viewModel.showRestartReasonLimitAlert
                     )
-                    .padding(24)
+                    .padding(Theme.timerAlertPadding)
                 }
             }
             .overlay(alignment: .top) {
@@ -180,7 +187,7 @@ struct TimerView: View {
                         viewModel.showRestartReasonCharacterLimitAlert()
                     }
                 )
-                .padding(.top, 238)
+                .padding(.top, Theme.timerRestartDialogTopPadding)
             }
             .overlay(alignment: .top) {
                 ConfirmationDialog(
@@ -188,7 +195,7 @@ struct TimerView: View {
                     onConfirm: viewModel.confirmClose,
                     onCancel: viewModel.cancelClose
                 )
-                .padding(.top, 270)
+                .padding(.top, Theme.timerCloseDialogTopPadding)
             }
             .fullScreenCover(isPresented: $viewModel.isStoryPresented) {
                 StoryView(

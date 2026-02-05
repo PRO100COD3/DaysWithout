@@ -17,74 +17,49 @@ struct SuccessPurchasesView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            Text(viewModel.title)
-                .font(.custom("Onest", size: 20))
-                .fontWeight(.semibold)
-                .foregroundColor(Theme.mainHeadingColor)
-                .padding(.top, 24)
-            
-            Text(viewModel.message)
-                .font(.custom("Onest", size: 16))
-                .fontWeight(.regular)
-                .foregroundColor(Theme.mainDescriptionColor)
-                .multilineTextAlignment(.center)
-                .padding(.top, 12)
-                .padding(.horizontal, 24)
-            
-            Button(action: viewModel.closeAll) {
-                Text(viewModel.buttonTitle)
-                    .font(.custom("Onest", size: 14))
-                    .fontWeight(.medium)
-                    .foregroundColor(Color(red: 58/255, green: 111/255, blue: 68/255))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color(red: 216/255, green: 241/255, blue: 207/255))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+        ModalCardView(strokeLineWidth: Theme.successModalStrokeLineWidth) {
+            VStack(spacing: Theme.successContentStackSpacing) {
+                Text(viewModel.title)
+                    .font(.custom(Theme.headingFontName, size: Theme.successTitleFontSize))
+                    .fontWeight(.semibold)
+                    .foregroundColor(Theme.mainHeadingColor)
+                    .padding(.top, Theme.successTitleTopPadding)
+
+                Text(viewModel.message)
+                    .font(.custom(Theme.headingFontName, size: Theme.successMessageFontSize))
+                    .fontWeight(.regular)
+                    .foregroundColor(Theme.mainDescriptionColor)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, Theme.successMessageTopPadding)
+                    .padding(.horizontal, Theme.successMessageHorizontalPadding)
+
+                Button(action: viewModel.closeAll) {
+                    Text(viewModel.buttonTitle)
+                        .font(.custom(Theme.headingFontName, size: Theme.successButtonFontSize))
+                        .fontWeight(.medium)
+                        .foregroundColor(Theme.addHabitCreateButtonTextColor)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: Theme.successButtonHeight)
+                        .background(Theme.addHabitCreateButtonBackgroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.successButtonCornerRadius))
+                }
+                .padding(.horizontal, Theme.successMessageHorizontalPadding)
+                .padding(.vertical, Theme.successContentVerticalPadding)
+                .shadow(color: Theme.addHabitModalShadowColor, radius: Theme.successButtonShadowRadius, x: 0, y: Theme.successButtonShadowY)
+                .pressAnimation()
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 24)
-            .shadow(color: Theme.addHabitModalShadowColor, radius: 8, x: 0, y: 4)
-            .pressAnimation()
-        }
-        .background(Color.white.opacity(Theme.addHabitModalBackgroundOpacity))
-        .clipShape(RoundedRectangle(cornerRadius: Theme.addHabitModalCornerRadius))
-        .overlay {
-            RoundedRectangle(cornerRadius: 25)
-                .stroke(Theme.addHabitModalBorderColor, lineWidth: 1)
-        }
-        .shadow(color: Color.black.opacity(0.12), radius: 25, x: 0, y: 10)
-        .overlay {
-            RoundedRectangle(cornerRadius: Theme.addHabitModalCornerRadius)
-                .fill(
-                    LinearGradient(
-                        colors: [Theme.addHabitModalInnerShadowColor, Color.clear],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .offset(y: Theme.addHabitModalInnerShadowOffsetY)
-                .blur(radius: Theme.addHabitModalInnerShadowBlur)
-                .mask(RoundedRectangle(cornerRadius: Theme.addHabitModalCornerRadius))
-                .allowsHitTesting(false)
         }
         .overlay(alignment: .topTrailing) {
-            Button(action: viewModel.closeAll) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Theme.mainHeadingColor)
-                    .frame(width: 36, height: 36)
-            }
-            .padding(10)
+            ModalCloseButtonView(style: .success, action: viewModel.closeAll)
         }
     }
 }
 
 #Preview {
     ZStack {
-        Color.white
+        Theme.previewBackgroundWhite
             .ignoresSafeArea()
         SuccessPurchasesView(onCloseAll: {})
-            .padding(.horizontal, 40)
+            .padding(.horizontal, Theme.screenPadding)
     }
 }
