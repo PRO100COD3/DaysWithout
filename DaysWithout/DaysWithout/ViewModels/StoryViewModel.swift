@@ -6,18 +6,47 @@
 import Foundation
 import Combine
 
-/// ViewModel экрана истории рестартов. Предоставляет список записей из сервиса; не содержит UI-кода.
+/// ViewModel экрана истории рестартов. Предоставляет список записей из сервиса и навигацию Support → SelectPurchases; не содержит UI-кода.
 @MainActor
 final class StoryViewModel: ObservableObject {
     @Published private(set) var history: [RestartRecord] = []
     
+    /// Показан ли экран «Поддержать разработчика»
+    @Published var isSupportPresented: Bool = false
+    
+    /// Показан ли экран выбора подписки (поверх Support)
+    @Published var isSelectPurchasesPresented: Bool = false
+    
     private let card: HabitCard
     private let restartHistoryService: RestartHistoryServiceProtocol
+    /// Закрыть весь экран Story (вызывается при закрытии флоу поддержки после успешной покупки)
+    private let onFullDismiss: () -> Void
     
-    init(card: HabitCard, restartHistoryService: RestartHistoryServiceProtocol) {
+    init(card: HabitCard, restartHistoryService: RestartHistoryServiceProtocol, onFullDismiss: @escaping () -> Void) {
         self.card = card
         self.restartHistoryService = restartHistoryService
+        self.onFullDismiss = onFullDismiss
         loadHistory()
+    }
+    
+    // MARK: - Навигация флоу поддержки
+    
+    /// Открыть экран Support (кнопка coins)
+    func openSupport() {
+        isSupportPresented = true
+    }
+    
+    /// Открыть экран выбора подписки (кнопка «ПОДДЕРЖАТЬ»). Скрывает Support.
+    func openSelectPurchases() {
+        isSupportPresented = false
+        isSelectPurchasesPresented = true
+    }
+    
+    /// Закрыть весь флоу поддержки и экран Story (крестик, тап по фону, «СПАСИБО»)
+    func dismissEntireSupportFlow() {
+        isSelectPurchasesPresented = false
+        isSupportPresented = false
+        onFullDismiss()
     }
     
     var cardTitle: String {

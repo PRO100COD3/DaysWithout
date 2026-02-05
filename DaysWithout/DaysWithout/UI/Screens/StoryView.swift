@@ -17,11 +17,11 @@ struct StoryView: View {
         self.card = card
         self.restartHistoryService = restartHistoryService
         self.onDismiss = onDismiss
-        _viewModel = StateObject(wrappedValue: StoryViewModel(card: card, restartHistoryService: restartHistoryService))
+        _viewModel = StateObject(wrappedValue: StoryViewModel(card: card, restartHistoryService: restartHistoryService, onFullDismiss: onDismiss))
     }
     
     var body: some View {
-        ZStack{
+        ZStack {
             LinearGradient(colors: [Theme.backgroundColor[0], Theme.backgroundColor[1]], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             VStack(spacing: 0) {
@@ -35,8 +35,29 @@ struct StoryView: View {
             .onAppear {
                 viewModel.loadHistory()
             }
+            .overlay {
+                if viewModel.isSupportPresented||viewModel.isSelectPurchasesPresented {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture { viewModel.dismissEntireSupportFlow() }
+                }
+            }
+            .overlay {
+                if viewModel.isSupportPresented {
+                    SupportView(
+                        onSupportTap: viewModel.openSelectPurchases,
+                        onCloseAll: viewModel.dismissEntireSupportFlow
+                    )
+                    .padding(.horizontal, 23)
+                }
+            }
+            .overlay {
+                if viewModel.isSelectPurchasesPresented {
+                    SelectPurchasesView(onCloseAll: viewModel.dismissEntireSupportFlow)
+                    .padding(.horizontal, 23)
+                }
+            }
         }
-        
     }
     
     private var headerView: some View {
@@ -53,7 +74,7 @@ struct StoryView: View {
                 .fontWeight(.bold)
                 .foregroundColor(.black)
             Spacer()
-            Button(action: onDismiss) {
+            Button(action: viewModel.openSupport) {
                 Image("coins")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(Theme.mainHeadingColor)
