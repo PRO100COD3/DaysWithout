@@ -15,7 +15,7 @@ struct SelectPurchasesView: View {
     
     init(onCloseAll: @escaping () -> Void) {
         self.onCloseAll = onCloseAll
-        _viewModel = StateObject(wrappedValue: SelectPurchasesViewModel())
+        _viewModel = StateObject(wrappedValue: SelectPurchasesViewModel(onCloseAll: onCloseAll))
     }
     
     var body: some View {
@@ -67,12 +67,9 @@ struct SelectPurchasesView: View {
 //        }
         .overlay {
             if viewModel.isSuccessPresented {
-                SuccessPurchasesView(onCloseAll: viewModel.closeAllFromSuccess)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                SuccessPurchasesView(onCloseAll: viewModel.closeAll)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-        }
-        .onAppear {
-            viewModel.onCloseAll = onCloseAll
         }
     }
     

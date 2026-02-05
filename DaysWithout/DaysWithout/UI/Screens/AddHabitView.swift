@@ -86,7 +86,9 @@ struct AddHabitView: View {
                     .allowsHitTesting(false)
             }
             .onAppear {
-                viewModel.updateCardsInfo()
+                DispatchQueue.main.async {
+                    viewModel.updateCardsInfo()
+                }
             }
             
             VStack {

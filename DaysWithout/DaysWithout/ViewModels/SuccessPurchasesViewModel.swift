@@ -19,11 +19,14 @@ final class SuccessPurchasesViewModel: ObservableObject {
     /// Текст кнопки
     var buttonTitle: String { "СПАСИБО" }
     
-    /// Вызывается при закрытии (кнопка СПАСИБО или крестик) — закрыть весь флоу
-    var onCloseAll: (() -> Void)?
+    private let onCloseAll: () -> Void
     
-    /// Закрыть весь флоу (кнопка СПАСИБО или крестик)
+    init(onCloseAll: @escaping () -> Void) {
+        self.onCloseAll = onCloseAll
+    }
+    
+    /// Закрыть только экраны подписки (крестик или кнопка СПАСИБО), Story остаётся
     func closeAll() {
-        onCloseAll?()
+        onCloseAll()
     }
 }

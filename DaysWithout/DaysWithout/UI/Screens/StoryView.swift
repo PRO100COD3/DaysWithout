@@ -36,24 +36,24 @@ struct StoryView: View {
                 viewModel.loadHistory()
             }
             .overlay {
-                if viewModel.isSupportPresented||viewModel.isSelectPurchasesPresented {
+                if viewModel.isSupportPresented || viewModel.isSelectPurchasesPresented {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
-                        .onTapGesture { viewModel.dismissEntireSupportFlow() }
+                        .onTapGesture { viewModel.dismissSupportFlowKeepStory() }
                 }
             }
             .overlay {
                 if viewModel.isSupportPresented {
                     SupportView(
                         onSupportTap: viewModel.openSelectPurchases,
-                        onCloseAll: viewModel.dismissEntireSupportFlow
+                        onCloseAll: viewModel.dismissSupportFlowKeepStory
                     )
                     .padding(.horizontal, 23)
                 }
             }
             .overlay {
                 if viewModel.isSelectPurchasesPresented {
-                    SelectPurchasesView(onCloseAll: viewModel.dismissEntireSupportFlow)
+                    SelectPurchasesView(onCloseAll: viewModel.dismissSupportFlowKeepStory)
                     .padding(.horizontal, 23)
                 }
             }

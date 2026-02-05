@@ -15,22 +15,24 @@ struct SupportView: View {
     init(onSupportTap: @escaping () -> Void, onCloseAll: @escaping () -> Void) {
         self.onSupportTap = onSupportTap
         self.onCloseAll = onCloseAll
-        _viewModel = StateObject(wrappedValue: SupportViewModel())
+        _viewModel = StateObject(wrappedValue: SupportViewModel(onSupportTap: onSupportTap, onCloseAll: onCloseAll))
     }
     
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
             Text(viewModel.title)
                 .font(.custom("Onest", size: 20))
                 .fontWeight(.semibold)
-                .foregroundColor(Theme.mainHeadingColor)
+                .multilineTextAlignment(.leading)
+                .foregroundColor(Color(red: 34/255, green: 34/255, blue: 34/255))
                 .padding(.top, 24)
+                .padding(.horizontal, 24)
             
             Text(viewModel.message)
                 .font(.custom("Onest", size: 16))
                 .fontWeight(.regular)
-                .foregroundColor(Theme.mainDescriptionColor)
-                .multilineTextAlignment(.center)
+                .foregroundColor(Color(red: 109/255, green: 109/255, blue: 109/255))
+                .multilineTextAlignment(.leading)
                 .padding(.top, 12)
                 .padding(.horizontal, 24)
             
@@ -38,15 +40,19 @@ struct SupportView: View {
                 Text(viewModel.buttonTitle)
                     .font(.custom("Onest", size: 14))
                     .fontWeight(.medium)
-                    .foregroundColor(Color(red: 76/255, green: 61/255, blue: 41/255))
+                    .foregroundColor(Color(red: 173/255, green: 133/255, blue: 17/255))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color(red: 255/255, green: 213/255, blue: 79/255))
+                    .padding(.vertical, 12)
+                    .background(Color(red: 255/255, green: 211/255, blue: 34/255).opacity(0.8))
                     .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color(red: 248/255, green: 224/255, blue: 130/255), lineWidth: 1)
+                    }
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 24)
+            .padding(24)
             .shadow(color: Theme.addHabitModalShadowColor, radius: 8, x: 0, y: 4)
+            
             .pressAnimation()
         }
         .background(Color.white.opacity(Theme.addHabitModalBackgroundOpacity))
@@ -79,10 +85,6 @@ struct SupportView: View {
             }
             .padding(10)
         }
-        .onAppear {
-            viewModel.onSupportTap = onSupportTap
-            viewModel.onCloseAll = onCloseAll
-        }
     }
 }
 
@@ -91,6 +93,6 @@ struct SupportView: View {
         Color.gray.opacity(0.5)
             .ignoresSafeArea()
         SupportView(onSupportTap: {}, onCloseAll: {})
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 23)
     }
 }

@@ -19,19 +19,21 @@ final class SupportViewModel: ObservableObject {
     /// Текст кнопки
     var buttonTitle: String { "ПОДДЕРЖАТЬ" }
     
-    /// Вызывается при любом закрытии (крестик, тап по фону) — закрыть весь флоу (Support, SelectPurchases, Success, Story)
-    var onCloseAll: (() -> Void)?
+    private let onCloseAll: () -> Void
+    private let onSupportTap: () -> Void
     
-    /// Вызывается при нажатии «ПОДДЕРЖАТЬ» — переход к экрану выбора подписки
-    var onSupportTap: (() -> Void)?
+    init(onSupportTap: @escaping () -> Void, onCloseAll: @escaping () -> Void) {
+        self.onSupportTap = onSupportTap
+        self.onCloseAll = onCloseAll
+    }
     
     /// Закрыть весь флоу (крестик или тап по фону)
     func closeAll() {
-        onCloseAll?()
+        onCloseAll()
     }
     
     /// Нажатие кнопки «ПОДДЕРЖАТЬ» — открыть экран выбора подписки
     func supportTapped() {
-        onSupportTap?()
+        onSupportTap()
     }
 }

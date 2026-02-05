@@ -47,8 +47,11 @@ final class SelectPurchasesViewModel: ObservableObject {
         return options[selectedIndex]
     }
     
-    /// Вызывается при любом закрытии (крестик, кнопка «СПАСИБО») — закрыть весь флоу (Support, SelectPurchases, Success, Story)
-    var onCloseAll: (() -> Void)?
+    private let onCloseAll: () -> Void
+    
+    init(onCloseAll: @escaping () -> Void) {
+        self.onCloseAll = onCloseAll
+    }
     
     /// Выбрать опцию по индексу
     func selectOption(at index: Int) {
@@ -63,14 +66,8 @@ final class SelectPurchasesViewModel: ObservableObject {
         isSuccessPresented = true
     }
     
-    /// Закрыть экран успеха и весь флоу («СПАСИБО» или крестик на Success)
-    func closeAllFromSuccess() {
-        isSuccessPresented = false
-        onCloseAll?()
-    }
-    
-    /// Закрыть весь флоу (крестик на SelectPurchases)
+    /// Закрыть только экраны подписки, Story остаётся (крестик или «СПАСИБО» на Success, крестик на SelectPurchases)
     func closeAll() {
-        onCloseAll?()
+        onCloseAll()
     }
 }

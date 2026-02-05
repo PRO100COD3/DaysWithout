@@ -18,7 +18,7 @@ struct DateView: View {
         self.initialDate = initialDate
         self.onConfirm = onConfirm
         self.onDismiss = onDismiss
-        _viewModel = StateObject(wrappedValue: DateViewModel(initialDate: initialDate))
+        _viewModel = StateObject(wrappedValue: DateViewModel(initialDate: initialDate, onConfirm: onConfirm))
     }
     
     var body: some View {
@@ -31,11 +31,6 @@ struct DateView: View {
                 contentView
                     .padding(.horizontal, 23)
                 Spacer()
-            }
-            .onAppear {
-                viewModel.onConfirm = { [onConfirm] date in
-                    onConfirm(date)
-                }
             }
         }
     }

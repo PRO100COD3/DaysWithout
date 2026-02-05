@@ -13,7 +13,7 @@ struct SuccessPurchasesView: View {
     
     init(onCloseAll: @escaping () -> Void) {
         self.onCloseAll = onCloseAll
-        _viewModel = StateObject(wrappedValue: SuccessPurchasesViewModel())
+        _viewModel = StateObject(wrappedValue: SuccessPurchasesViewModel(onCloseAll: onCloseAll))
     }
     
     var body: some View {
@@ -76,9 +76,6 @@ struct SuccessPurchasesView: View {
                     .frame(width: 36, height: 36)
             }
             .padding(10)
-        }
-        .onAppear {
-            viewModel.onCloseAll = onCloseAll
         }
     }
 }

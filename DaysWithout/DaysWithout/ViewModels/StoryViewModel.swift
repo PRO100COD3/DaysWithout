@@ -42,11 +42,23 @@ final class StoryViewModel: ObservableObject {
         isSelectPurchasesPresented = true
     }
     
-    /// Закрыть весь флоу поддержки и экран Story (крестик, тап по фону, «СПАСИБО»)
+    /// Закрыть только экраны подписки (Support, SelectPurchases, Success), Story остаётся открытым (крестик, тап мимо)
+    func dismissSupportFlowKeepStory() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.isSelectPurchasesPresented = false
+            self.isSupportPresented = false
+        }
+    }
+    
+    /// Закрыть весь флоу поддержки и экран Story («СПАСИБО» после успешной покупки)
     func dismissEntireSupportFlow() {
-        isSelectPurchasesPresented = false
-        isSupportPresented = false
-        onFullDismiss()
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.isSelectPurchasesPresented = false
+            self.isSupportPresented = false
+            self.onFullDismiss()
+        }
     }
     
     var cardTitle: String {

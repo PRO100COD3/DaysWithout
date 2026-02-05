@@ -25,10 +25,11 @@ final class DateViewModel: ObservableObject {
     private let initialDate: Date
     
     /// Замыкание при подтверждении: передаётся итоговая дата
-    var onConfirm: ((Date) -> Void)?
+    private let onConfirm: (Date) -> Void
     
-    init(initialDate: Date = Date()) {
+    init(initialDate: Date = Date(), onConfirm: @escaping (Date) -> Void) {
         self.initialDate = initialDate
+        self.onConfirm = onConfirm
         self.selectedDate = initialDate
         self.calendarMonth = calendar.startOfMonth(for: initialDate)
     }
@@ -123,7 +124,7 @@ final class DateViewModel: ObservableObject {
         case .date:
             step = .time
         case .time:
-            onConfirm?(selectedDate)
+            onConfirm(selectedDate)
         }
     }
     
